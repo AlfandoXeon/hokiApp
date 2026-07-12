@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Pembayaran{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/kasir.css') }}">
+{% endblock %}
+
+{% block breadcrumb_current %}
+  <span class="material-symbols-outlined" style="font-size:14px;opacity:0.5">chevron_right</span>
+  <span><a href="{{ url_for('kasir') }}" style="color:var(--on-surface-variant)">Kasir</a></span>
+  <span class="material-symbols-outlined" style="font-size:14px;opacity:0.5">chevron_right</span>
+  <span class="breadcrumb-active">Pembayaran</span>
+{% endblock %}
+{% block page_title %}Pembayaran{% endblock %}
+
+{% block content %}
+<div class="page-canvas">
+  <!-- Header -->
+  <div class="page-header" style="margin-bottom:var(--stack-md)">
+    <div>
+      <h2 class="page-header-title" id="paymentTitle">Pembayaran</h2>
+      <p class="page-header-sub">Selesaikan transaksi pesanan</p>
+    </div>
+    <a href="{{ url_for('kasir') }}" class="btn btn-outlined no-print">
+      <span class="material-symbols-outlined icon-sm">arrow_back</span>
+      Kembali ke Kasir
+    </a>
+  </div>
+
+  <div class="payment-layout">
+    <!-- Left: Order Summary -->
+    <div class="order-summary-card">
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:var(--stack-md);display:flex;align-items:center;gap:8px">
+        <span class="material-symbols-outlined" style="color:var(--primary)">receipt</span>
+        Ringkasan Pesanan
+      </h3>
+      <hr class="divider">
+      <div class="order-items-list" id="orderItemsList">
+        <div class="spinner" style="margin:20px auto"></div>
+      </div>
+      <hr class="divider" style="margin-top:var(--stack-md)">
+      <div class="order-totals">
+        <div class="order-total-row">
+          <span>Subtotal</span>
+          <span id="summarySubtotal">—</span>
+        </div>
+        <div class="order-total-row" id="summaryTaxRow">
+          <span>Pajak (<span id="summaryTaxRate">10</span>%)</span>
+          <span id="summaryTax">—</span>
+        </div>
+        <div class="order-total-row grand-total">
+          <span>Total</span>
+          <span id="summaryTotal">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Payment Method -->
+    <div class="payment-card">
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:var(--stack-md)">Metode Pembayaran</h3>
+
+      <!-- Method Tabs -->
+      <div class="payment-methods-grid">
+        <button class="payment-method-btn active" data-method="tunai" onclick="selectPaymentMethod('tunai')">
+          <span class="material-symbols-outlined icon-sm">payments</span>
+          Tunai
+        </button>
+        <button class="payment-method-btn" data-method="qris" onclick="selectPaymentMethod('qris')">
+          <span class="material-symbols-outlined icon-sm">qr_code_scanner</span>
+          QRIS
+        </button>
+        <button class="payment-method-btn" data-method="transfer" onclick="selectPaymentMethod('transfer')">
+          <span class="material-symbols-outlined icon-sm">account_balance</span>
+          Transfer
+        </button>
+      </div>
+
+      <!-- ── Tunai Section ── -->
+      <div id="sectionTunai">
+        <div class="cash-section">
+          <label class="form-label">Jumlah Uang Diterima</label>
+          <div class="cash-input-wrapper">
+            <span class="cash-prefix">Rp</span>
+            <input class="cash-input" type="text" id="cashInput" placeholder="0" inputmode="numeric">
+          </div>
+          <!-- Quick denominations -->
+          <div class="denomination-grid" id="denomGrid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+
+        <!-- Change -->
+        <div class="change-display">
+          <span class="change-label">Kembalian</span>
+          <span class="change-amount" id="changeAmount">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- ── QRIS Section ── -->
+      <div id="sectionQris" style="display:none">
+        <div class="qris-section">
+          <div class="qris-placeholder">
+            <span class="material-symbols-outlined">qr_code_2</span>
+            <p style="font-size:12px;text-align:center">Scan QRIS<br>Penyetan Hoki</p>
+          </div>
+          <p style="font-size:13px;color:var(--on-surface-variant);text-align:center">
+            Minta pelanggan untuk scan kode QRIS di atas.<br>
+            Pastikan pembayaran sudah diterima sebelum konfirmasi.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Transfer Section ── -->
+      <div id="sectionTransfer" style="display:none">
+        <div class="transfer-section" id="bankInfoSection">
+          <div class="bank-info-row">
+            <span class="bank-info-label">Bank</span>
+            <span class="bank-info-value" id="bankName">—</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Nomor Rekening</span>
+            <span class="bank-info-value" id="bankAccount">—</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Atas Nama</span>
+            <span class="bank-info-value" id="bankHolder">—</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Jumlah Transfer</span>
+            <span class="bank-info-value" id="bankAmount" style="color:var(--primary);font-weight:700">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="payment-actions no-print">
+        <button class="btn btn-outlined" onclick="window.location.href='{{ url_for('kasir') }}'">
+          <span class="material-symbols-outlined icon-sm">arrow_back</span>
+          Kembali
+        </button>
+        <button class="btn-complete" id="btnComplete" onclick="completePayment()">
+          <span class="material-symbols-outlined icon-sm">check_circle</span>
+          Selesaikan & Cetak Struk
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt (print-only) -->
+  <div class="receipt-print" id="receiptPrint">
+    <div style="text-align:center;margin-bottom:8px">
+      <strong style="font-size:16px">WARUNG PENYETAN HOKI</strong><br>
+      <span id="receiptAddress"></span><br>
+      <span id="receiptPhone"></span>
+    </div>
+    <hr style="border:none;border-top:1px dashed #000;margin:8px 0">
+    <div style="display:flex;justify-content:space-between;font-size:11px">
+      <span id="receiptDate"></span>
+      <span id="receiptOrderCode"></span>
+    </div>
+    <hr style="border:none;border-top:1px dashed #000;margin:8px 0">
+    <div id="receiptItems"></div>
+    <hr style="border:none;border-top:1px dashed #000;margin:8px 0">
+    <div id="receiptTotals" style="font-size:12px"></div>
+    <hr style="border:none;border-top:1px dashed #000;margin:8px 0">
+    <div style="text-align:center;font-size:11px" id="receiptFooter"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const TRANSACTION_ID = {{ transaction_id }};
+</script>
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HokiApp{% endblock %} — Penyetan Hoki</title>
+  <meta name="description" content="Sistem manajemen transaksi dan stok Warung Penyetan Hoki">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">
+        <span class="material-symbols-outlined fill" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">restaurant</span>
+      </div>
+      <div class="sidebar-brand-text">
+        <h1>Penyetan Hoki</h1>
+        <p>Restaurant Manager</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('dashboard') }}"
+         class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}"
+         id="nav-home">
+        <span class="material-symbols-outlined">home</span>
+        <span>Home</span>
+      </a>
+
+      <a href="{{ url_for('kasir') }}"
+         class="nav-item {% if request.endpoint in ['kasir', 'payment'] %}active{% endif %}"
+         id="nav-kasir">
+        <span class="material-symbols-outlined">point_of_sale</span>
+        <span>Kasir</span>
+      </a>
+
+      <a href="{{ url_for('stock') }}"
+         class="nav-item {% if request.endpoint == 'stock' %}active{% endif %}"
+         id="nav-stock">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <span>Manajemen Stock</span>
+      </a>
+
+      {% if session.get('role') == 'admin' %}
+      <a href="{{ url_for('settings') }}"
+         class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}"
+         id="nav-settings">
+        <span class="material-symbols-outlined">settings</span>
+        <span>Pengaturan</span>
+      </a>
+      {% endif %}
+    </nav>
+
+    <!-- Footer: Logout -->
+    <div class="sidebar-footer">
+      <a href="{{ url_for('logout') }}" class="nav-item logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  {% block main_wrapper_open %}
+  <div class="main-content">
+  {% endblock %}
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <div class="breadcrumb">
+          <span>{% block breadcrumb_parent %}Home{% endblock %}</span>
+          {% block breadcrumb_current %}{% endblock %}
+        </div>
+        <span class="top-bar-title">{% block page_title %}Dashboard{% endblock %}</span>
+      </div>
+      <div class="top-bar-right">
+        <button class="icon-btn" title="Notifikasi">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="icon-btn" title="Bantuan">
+          <span class="material-symbols-outlined">help</span>
+        </button>
+        <!-- User avatar -->
+        <div class="avatar-circle" title="{{ session.get('nama_lengkap', session.get('username', '')) }}">
+          {{ (session.get('nama_lengkap', session.get('username', 'U'))[0] | upper) }}
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    {% block content %}{% endblock %}
+
+  {% block main_wrapper_close %}
+  </div>
+  {% endblock %}
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Global JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

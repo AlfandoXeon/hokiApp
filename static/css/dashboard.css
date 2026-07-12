@@ -1,0 +1,87 @@
+/* ============================================================
+   HokiApp — Dashboard Page Styles
+   ============================================================ */
+
+/* KPI Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gutter);
+  margin-bottom: var(--stack-lg);
+}
+
+/* Dashboard split layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--gutter);
+  align-items: start;
+}
+
+/* Transactions table card */
+.transactions-card { overflow: hidden; }
+.transactions-card tbody tr:hover { background-color: rgba(215,228,236,0.25); }
+
+/* Low stock panel */
+.stock-alerts-list {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: var(--stack-md);
+}
+
+/* Period selector dropdown */
+.period-select-wrapper { position: relative; display: inline-flex; align-items: center; }
+.period-select {
+  appearance: none;
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 8px 36px 8px 14px;
+  font-size: 13px; font-weight: 500;
+  color: var(--on-surface);
+  cursor: pointer; outline: none;
+  min-height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath fill='%2340493d' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color 0.15s;
+}
+.period-select:focus { border-color: var(--primary); }
+
+/* Status badges in table */
+.badge-pending  { background-color: rgba(0,95,175,0.10); color: var(--secondary); }
+.badge-paid     { background-color: rgba(13,99,27,0.10); color: var(--primary); }
+.badge-cancelled{ background-color: rgba(64,73,61,0.10); color: var(--on-surface-variant); }
+
+/* Date display */
+.date-display {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--on-surface-variant);
+}
+
+/* Restock quick button */
+.btn-restock {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  font-size: 11px; font-weight: 700;
+  color: var(--on-surface);
+  background-color: var(--surface-container-lowest);
+  cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+  text-decoration: none;
+}
+.btn-restock:hover { background-color: var(--surface-container-high); border-color: var(--outline); }
+
+/* No data state */
+.no-data-row td {
+  text-align: center; padding: 48px;
+  color: var(--on-surface-variant); font-style: italic;
+}
+
+/* Items summary truncate */
+.items-summary-cell {
+  max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--on-surface-variant);
+}

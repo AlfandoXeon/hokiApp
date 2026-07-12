@@ -1,0 +1,158 @@
+/* ============================================================
+   HokiApp — Stock Management Page Styles
+   ============================================================ */
+
+/* Stock page toolbar */
+.stock-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--stack-md);
+  gap: var(--gutter);
+}
+
+.stock-filters {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1;
+}
+
+.stock-search-wrapper {
+  position: relative;
+  flex: 1; max-width: 340px;
+}
+.stock-search-wrapper .material-symbols-outlined {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--on-surface-variant); font-size: 18px; pointer-events: none;
+}
+.stock-search {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-full);
+  background-color: var(--surface-container-lowest);
+  font-size: 14px; color: var(--on-surface);
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.stock-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,99,27,0.10); }
+
+/* Stock table enhancements */
+.stock-table-card { overflow: hidden; }
+.stock-table-card .card-header { background-color: rgba(215,228,236,0.12); }
+
+.product-name-cell { display: flex; align-items: center; gap: 12px; }
+
+.product-thumb {
+  width: 44px; height: 44px; border-radius: var(--radius-lg);
+  background-color: var(--surface-container);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+  border: 1px solid var(--outline-variant);
+}
+.product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.product-thumb .material-symbols-outlined {
+  font-size: 22px; color: var(--outline);
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.product-name-text { font-size: 14px; font-weight: 600; color: var(--on-surface); }
+.product-category-text { font-size: 12px; color: var(--on-surface-variant); margin-top: 2px; }
+
+/* Stock level indicator */
+.stock-level-cell { display: flex; flex-direction: column; gap: 4px; }
+.stock-qty { font-size: 15px; font-weight: 700; color: var(--on-background); }
+.stock-unit-text { font-size: 11px; color: var(--on-surface-variant); }
+.stock-bar-wrapper { width: 60px; height: 4px; background-color: var(--outline-variant); border-radius: 2px; overflow: hidden; }
+.stock-bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+.stock-bar.safe     { background-color: var(--primary); }
+.stock-bar.warning  { background-color: #d97706; }
+.stock-bar.critical { background-color: var(--tertiary); }
+.stock-bar.empty    { background-color: var(--outline); width: 0 !important; }
+
+/* Table action buttons */
+.table-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.action-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; border: none;
+  color: var(--on-surface-variant); background-color: transparent;
+}
+.action-btn:hover { background-color: var(--surface-container-high); color: var(--on-surface); }
+.action-btn.edit:hover { background-color: rgba(0,95,175,0.10); color: var(--secondary); }
+.action-btn.delete:hover { background-color: rgba(186,26,26,0.10); color: var(--error); }
+.action-btn .material-symbols-outlined { font-size: 18px; }
+
+/* Product Modal */
+.product-modal { max-width: 580px; }
+.product-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Image upload zone */
+.image-upload-zone {
+  border: 2px dashed var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  background-color: var(--surface-container-low);
+  position: relative;
+  overflow: hidden;
+}
+.image-upload-zone:hover {
+  border-color: var(--primary);
+  background-color: rgba(13,99,27,0.04);
+}
+.image-upload-zone.has-image {
+  padding: 0; border-style: solid; border-color: var(--outline-variant);
+}
+.image-upload-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2;
+  width: 100%; height: 100%;
+}
+.image-upload-zone .upload-placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--on-surface-variant);
+  pointer-events: none;
+}
+.image-upload-zone .upload-placeholder .material-symbols-outlined { font-size: 36px; opacity: 0.5; }
+.image-upload-zone .upload-placeholder p { font-size: 13px; }
+.image-upload-zone .image-preview {
+  width: 100%; height: 140px; object-fit: cover;
+  display: none;
+}
+.image-upload-zone.has-image .image-preview { display: block; }
+.image-upload-zone.has-image .upload-placeholder { display: none; }
+
+/* Delete confirmation modal */
+.delete-modal { max-width: 400px; text-align: center; }
+.delete-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background-color: var(--error-container);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto var(--stack-md);
+  color: var(--error);
+}
+.delete-icon .material-symbols-outlined { font-size: 32px; }
+.delete-modal p { font-size: 14px; color: var(--on-surface-variant); margin-top: 6px; }
+
+/* Restock modal */
+.restock-modal { max-width: 380px; }
+.restock-current {
+  background-color: var(--surface-container-low);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  text-align: center;
+  margin-bottom: var(--stack-md);
+}
+.restock-current-qty { font-size: 36px; font-weight: 700; color: var(--primary); }
+.restock-current-label { font-size: 12px; color: var(--on-surface-variant); margin-top: 4px; }
+
+/* Category filter chips for stock */
+.category-filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: var(--stack-md);
+}
+
+/* Availability toggle in table */
+.availability-toggle {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--on-surface-variant);
+}

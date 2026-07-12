@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — HokiApp Penyetan Hoki</title>
+  <meta name="description" content="Login ke sistem manajemen Warung Penyetan Hoki">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-page">
+
+  <!-- Decorative background blobs -->
+  <div class="auth-bg-blob auth-bg-blob-1"></div>
+  <div class="auth-bg-blob auth-bg-blob-2"></div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-card-header">
+      <div class="login-logo">
+        <span class="material-symbols-outlined">restaurant</span>
+      </div>
+      <div>
+        <h1 class="login-app-name">HokiApp</h1>
+        <p class="login-app-sub">Warung Penyetan & Es Teh Hoki</p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="login-form-area">
+      {% if error %}
+      <div class="error-banner">
+        <span class="material-symbols-outlined">error</span>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <form class="login-form" method="POST" action="{{ url_for('login') }}">
+        <!-- Username Field -->
+        <div class="form-group">
+          <label class="form-label" for="username">Admin ID / Username</label>
+          <div class="input-group">
+            <div class="input-icon-left">
+              <span class="material-symbols-outlined icon-sm">badge</span>
+            </div>
+            <input
+              class="form-input has-icon-left"
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Masukkan username"
+              autocomplete="username"
+              required
+              value="{{ request.form.get('username', '') }}"
+            >
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-group password-wrapper">
+            <div class="input-icon-left">
+              <span class="material-symbols-outlined icon-sm">lock</span>
+            </div>
+            <input
+              class="form-input has-icon-left"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            >
+            <div class="password-toggle" id="passwordToggle" title="Tampilkan/sembunyikan password">
+              <span class="material-symbols-outlined icon-sm" id="passwordToggleIcon">visibility_off</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions row -->
+        <div class="login-actions">
+          <label class="remember-me">
+            <input type="checkbox" name="remember_me" id="rememberMe">
+            <span>Ingat saya</span>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="material-symbols-outlined icon-sm">login</span>
+          MASUK
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-card-footer">
+      <span class="material-symbols-outlined">shield</span>
+      <span>Koneksi aman — Sistem offline lokal</span>
+    </div>
+  </div>
+
+  <script>
+    // Password toggle
+    const toggle = document.getElementById('passwordToggle');
+    const pwInput = document.getElementById('password');
+    const pwIcon  = document.getElementById('passwordToggleIcon');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        const isHidden = pwInput.type === 'password';
+        pwInput.type = isHidden ? 'text' : 'password';
+        pwIcon.textContent = isHidden ? 'visibility' : 'visibility_off';
+      });
+    }
+
+    // Loading state on submit
+    const loginBtn = document.getElementById('loginBtn');
+    const loginForm = document.querySelector('.login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', () => {
+        loginBtn.innerHTML = '<div class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:20px;height:20px;border-width:2px;"></div> Memproses...';
+        loginBtn.disabled = true;
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Kasir{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/kasir.css') }}">
+{% endblock %}
+
+{% block breadcrumb_current %}
+  <span class="material-symbols-outlined" style="font-size:14px;opacity:0.5">chevron_right</span>
+  <span class="breadcrumb-active">Kasir</span>
+{% endblock %}
+{% block page_title %}Kasir{% endblock %}
+
+{% block main_wrapper_open %}<div class="main-content-full">{% endblock %}
+{% block main_wrapper_close %}</div>{% endblock %}
+
+{% block content %}
+<!-- Kasir content is directly inside main-content-full, after top-bar -->
+<div class="kasir-layout" style="flex:1;overflow:hidden;">
+
+  <!-- ── Left: Menu Panel ── -->
+  <div class="menu-panel">
+    <!-- Category filter chips -->
+    <div class="category-bar" id="categoryBar">
+      <button class="chip active" data-category="all" id="chip-all">Semua Menu</button>
+      <!-- Dynamically added category chips -->
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="menu-grid-wrapper">
+      <div class="menu-grid" id="menuGrid">
+        <!-- Loading state -->
+        <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--on-surface-variant)">
+          <div class="spinner" style="margin:0 auto 16px;width:32px;height:32px;border-width:3px"></div>
+          Memuat menu...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: Cart Panel ── -->
+  <div class="cart-panel">
+    <!-- Cart Header -->
+    <div class="cart-header">
+      <span class="cart-title">Pesanan Baru</span>
+      <div class="flex items-center gap-sm">
+        <!-- Pending orders button -->
+        <button class="icon-btn" id="btnPendingOrders" title="Pesanan Pending" style="position:relative">
+          <span class="material-symbols-outlined">pending_actions</span>
+          <span class="pending-badge" id="pendingCount" style="display:none;position:absolute;top:4px;right:4px;font-size:9px;width:16px;height:16px">0</span>
+        </button>
+        <!-- Clear cart -->
+        <button class="icon-btn" id="btnClearCart" title="Bersihkan keranjang">
+          <span class="material-symbols-outlined">delete_sweep</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="cart-items-list" id="cartItemsList">
+      <div class="cart-empty" id="cartEmptyState">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <p>Keranjang kosong<br>Pilih menu untuk menambahkan</p>
+      </div>
+    </div>
+
+    <!-- Cart Footer -->
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-totals">
+        <div class="cart-total-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">Rp 0</span>
+        </div>
+        <div class="cart-total-row" id="taxRow">
+          <span>Pajak (<span id="taxRateLabel">10</span>%)</span>
+          <span id="cartTax">Rp 0</span>
+        </div>
+        <div class="cart-total-row grand-total">
+          <span>Total</span>
+          <span class="total-amount" id="cartTotal">Rp 0</span>
+        </div>
+      </div>
+
+      <button class="btn-pay" id="btnPay" onclick="proceedToPayment()">
+        <span class="material-symbols-outlined">payments</span>
+        Bayar Sekarang
+      </button>
+
+      <div class="cart-actions">
+        <button class="btn btn-outlined btn-sm" id="btnSaveBill" onclick="saveBill()">
+          <span class="material-symbols-outlined icon-sm">save</span>
+          Simpan Bill
+        </button>
+        <button class="btn btn-danger btn-sm" id="btnCancelCart" onclick="cancelCurrentOrder()">
+          <span class="material-symbols-outlined icon-sm">cancel</span>
+          Batalkan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Item Note ── -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <h3 class="modal-title">Catatan untuk Item</h3>
+      <button class="icon-btn" onclick="closeModal('noteModal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="body-md" style="margin-bottom:12px;color:var(--on-surface-variant)" id="noteModalItemName"></p>
+      <div class="form-group">
+        <label class="form-label">Catatan (opsional)</label>
+        <textarea class="form-textarea" id="noteInput" placeholder="Contoh: Pedas sedang, tanpa sambal..." rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outlined" onclick="closeModal('noteModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveItemNote()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Pending Orders ── -->
+<div class="modal-overlay" id="pendingModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3 class="modal-title">Pesanan Pending</h3>
+      <button class="icon-btn" onclick="closeModal('pendingModal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="pending-list" id="pendingList">
+        <div class="empty-state"><p>Tidak ada pesanan pending</p></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outlined" onclick="closeModal('pendingModal')">Tutup</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/kasir.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,95 @@
+/* ============================================================
+   HokiApp — Settings Page Styles
+   ============================================================ */
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--gutter);
+  align-items: start;
+}
+
+.settings-section {
+  display: flex; flex-direction: column;
+  gap: var(--gutter);
+}
+
+.settings-card {
+  background-color: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.settings-card-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--outline-variant);
+  display: flex; align-items: center; justify-content: space-between;
+  background-color: rgba(215,228,236,0.10);
+}
+.settings-card-title {
+  font-size: 17px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--on-surface);
+}
+.settings-card-title .material-symbols-outlined { color: var(--primary); font-size: 22px; }
+
+.settings-card-body { padding: 22px; }
+.settings-form .form-group { margin-bottom: 18px; }
+.settings-form .form-group:last-child { margin-bottom: 0; }
+
+/* User table */
+.users-table-card { overflow: hidden; }
+.user-role-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
+
+/* Backup status */
+.backup-status {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: var(--stack-md);
+}
+.backup-status .material-symbols-outlined { color: var(--primary); font-size: 28px; }
+.backup-status-text { flex: 1; }
+.backup-status-label { font-size: 12px; color: var(--on-surface-variant); }
+.backup-status-time  { font-size: 14px; font-weight: 600; color: var(--surface-tint); margin-top: 2px; }
+
+/* Tax settings */
+.tax-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+}
+.tax-row-label { font-size: 14px; color: var(--on-surface); font-weight: 500; }
+.tax-rate-input {
+  width: 100px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  color: var(--on-surface);
+  text-align: center;
+  outline: none;
+}
+.tax-rate-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,99,27,0.10); }
+
+/* Printer card */
+.printer-test-area { margin-top: var(--stack-md); }
+
+/* Add User Modal */
+.user-modal { max-width: 440px; }
+
+/* Footer note */
+.settings-note {
+  font-size: 12px; color: var(--on-surface-variant);
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex; gap: 8px; align-items: flex-start;
+  margin-top: var(--stack-md);
+}
+.settings-note .material-symbols-outlined { font-size: 16px; color: var(--secondary); flex-shrink: 0; margin-top: 1px; }

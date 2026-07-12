@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block breadcrumb_current %}{% endblock %}
+{% block page_title %}Dashboard — Ringkasan Hari Ini{% endblock %}
+
+{% block content %}
+<div class="page-canvas">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-header-title">Selamat datang, {{ session.get('nama_lengkap', session.get('username')) }}!</h2>
+      <p class="page-header-sub">Berikut ringkasan performa warung Anda</p>
+    </div>
+    <div class="flex items-center gap-md">
+      <!-- Date display -->
+      <div class="date-display">
+        <span class="material-symbols-outlined icon-sm">calendar_today</span>
+        <span id="currentDate">—</span>
+      </div>
+      <!-- Period selector -->
+      <select class="period-select" id="periodSelect" title="Filter periode">
+        <option value="today">Hari Ini</option>
+        <option value="week">Minggu Ini</option>
+        <option value="month">Bulan Ini</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpiGrid">
+    <!-- Skeleton placeholders -->
+    <div class="kpi-card" id="kpiRevenue">
+      <div class="kpi-card-header">
+        <span class="kpi-label">Total Pendapatan</span>
+        <div class="kpi-icon primary">
+          <span class="material-symbols-outlined icon-sm">payments</span>
+        </div>
+      </div>
+      <div class="kpi-value" id="kpiRevenueValue"><div class="spinner"></div></div>
+      <div class="kpi-footer positive" id="kpiRevenueGrowth">
+        <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
+        <span>Memuat...</span>
+      </div>
+    </div>
+
+    <div class="kpi-card" id="kpiTransactions">
+      <div class="kpi-card-header">
+        <span class="kpi-label">Total Transaksi</span>
+        <div class="kpi-icon secondary">
+          <span class="material-symbols-outlined icon-sm">receipt_long</span>
+        </div>
+      </div>
+      <div class="kpi-value" id="kpiTxnValue"><div class="spinner"></div></div>
+      <div class="kpi-footer positive" id="kpiTxnGrowth">
+        <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
+        <span>Memuat...</span>
+      </div>
+    </div>
+
+    <div class="kpi-card" id="kpiBestSeller">
+      <div class="kpi-card-header">
+        <span class="kpi-label">Menu Paling Laku</span>
+        <div class="kpi-icon tertiary">
+          <span class="material-symbols-outlined icon-sm">local_fire_department</span>
+        </div>
+      </div>
+      <div class="kpi-value-md" id="kpiBestName" style="margin-top:10px;font-size:18px">—</div>
+      <div class="kpi-footer neutral" id="kpiBestQty">
+        <span class="material-symbols-outlined" style="font-size:14px">bar_chart</span>
+        <span>Memuat...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Split: Transactions + Low Stock -->
+  <div class="dashboard-grid">
+    <!-- Left: Transaction History -->
+    <div class="card transactions-card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-symbols-outlined">receipt_long</span>
+          Riwayat Transaksi
+        </h3>
+        <a href="{{ url_for('kasir') }}" class="btn btn-sm btn-outlined">
+          <span class="material-symbols-outlined icon-sm">add</span>
+          Transaksi Baru
+        </a>
+      </div>
+      <div class="table-wrapper">
+        <table id="transactionTable">
+          <thead>
+            <tr>
+              <th>ID Pesanan</th>
+              <th>Waktu</th>
+              <th>Item Terjual</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="transactionTableBody">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--on-surface-variant)">
+              <div class="spinner" style="margin:0 auto 12px"></div>Memuat data...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right: Stock Alerts -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-symbols-outlined" style="color:var(--tertiary)">warning</span>
+          Peringatan Stock
+        </h3>
+        <a href="{{ url_for('stock') }}" class="btn btn-sm btn-ghost">Kelola</a>
+      </div>
+      <div class="stock-alerts-list" id="stockAlertsList">
+        <div style="text-align:center;padding:32px;color:var(--on-surface-variant)">
+          <div class="spinner" style="margin:0 auto 12px"></div>Memuat...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
