@@ -1,95 +1,529 @@
 /* ============================================================
-   HokiApp — Settings Page Styles
+   HokiApp v2.0 — Settings Premium Styles (settings.css)
+   Clean Layout + Card Styling + Jagged Receipt Preview
    ============================================================ */
 
+/* ─── Layout & Sidenav ──────────────────────────────────────── */
 .settings-layout {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: var(--gutter);
+  grid-template-columns: 240px 1fr;
+  gap: var(--gap);
   align-items: start;
 }
 
-.settings-section {
-  display: flex; flex-direction: column;
-  gap: var(--gutter);
+@media (max-width: 992px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
-.settings-card {
-  background-color: var(--surface-container-lowest);
+.settings-nav {
+  background: var(--surface);
   border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-xl);
+  border-radius: 20px;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+}
+
+.settings-nav-group-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+  padding: 16px 20px 6px;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: all var(--tr-fast);
+  border-left: 4px solid transparent;
+  text-decoration: none;
+}
+
+.settings-nav-item:hover {
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+}
+
+.settings-nav-item.active {
+  background: rgba(27, 109, 36, 0.08);
+  color: var(--primary);
+  font-weight: 700;
+  border-left-color: var(--primary);
+}
+
+.settings-nav-item .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.settings-nav-divider {
+  height: 1px;
+  background: var(--outline-variant);
+  margin: 6px 0;
+  opacity: 0.7;
+}
+
+/* ─── Settings Card Sections ─────────────────────────────────── */
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-section {
+  scroll-margin-top: 80px;
+  border-radius: 20px !important;
+  border: 1.5px solid var(--outline-variant) !important;
+  box-shadow: var(--shadow-sm) !important;
+  background: var(--surface) !important;
   overflow: hidden;
 }
 
-.settings-card-header {
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--outline-variant);
-  display: flex; align-items: center; justify-content: space-between;
-  background-color: rgba(215,228,236,0.10);
+.settings-card-header-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1.5px solid var(--outline-variant);
+  background: var(--surface-container-low);
 }
+
 .settings-card-title {
-  font-size: 17px; font-weight: 700;
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--on-surface);
 }
-.settings-card-title .material-symbols-outlined { color: var(--primary); font-size: 22px; }
 
-.settings-card-body { padding: 22px; }
-.settings-form .form-group { margin-bottom: 18px; }
-.settings-form .form-group:last-child { margin-bottom: 0; }
-
-/* User table */
-.users-table-card { overflow: hidden; }
-.user-role-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
-
-/* Backup status */
-.backup-status {
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
-  padding: 14px;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: var(--stack-md);
+.settings-card-title .material-symbols-outlined {
+  font-size: 22px;
+  color: var(--primary);
 }
-.backup-status .material-symbols-outlined { color: var(--primary); font-size: 28px; }
-.backup-status-text { flex: 1; }
-.backup-status-label { font-size: 12px; color: var(--on-surface-variant); }
-.backup-status-time  { font-size: 14px; font-weight: 600; color: var(--surface-tint); margin-top: 2px; }
 
-/* Tax settings */
-.tax-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0;
+/* ─── Media Upload Section ───────────────────────────────────── */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
 }
-.tax-row-label { font-size: 14px; color: var(--on-surface); font-weight: 500; }
-.tax-rate-input {
-  width: 100px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
-  font-size: 14px;
+
+.media-card {
+  background: var(--surface-container-lowest);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all var(--tr-fast);
+  display: flex;
+  flex-direction: column;
+}
+
+.media-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.media-preview {
+  height: 150px;
+  background: var(--surface-container-low);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1.5px solid var(--outline-variant);
+  padding: 10px;
+}
+
+.media-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  display: none;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.media-preview:hover img {
+  transform: scale(1.03);
+}
+
+.media-preview.has-media img {
+  display: block;
+}
+
+.media-preview .media-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.media-preview.has-media .media-placeholder {
+  display: none;
+}
+
+.media-preview .material-symbols-outlined {
+  font-size: 40px;
+  color: var(--outline);
+}
+
+.media-preview p {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.media-card-footer {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface-container-low);
+  border-top: 1.5px solid var(--outline-variant);
+}
+
+.media-label {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--on-surface);
+}
+
+.media-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── Real-Time Live Receipt Preview ──────────────────────────── */
+.receipt-preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 320px;
+}
+
+.receipt-preview-paper {
+  background: #fbfbfa;
+  border: 1px solid #d4d4cb;
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme="dark"] .receipt-preview-paper {
+  background: #f9f9f5; /* Keep receipt preview light-colored even in dark mode for realistic print preview */
+  border-color: #c9c9c0;
+}
+
+.receipt-preview-box {
+  padding: 24px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #2b2b27;
+  line-height: 1.45;
+  flex-grow: 1;
+}
+
+.receipt-preview-box .rp-header {
   text-align: center;
-  outline: none;
+  margin-bottom: 12px;
 }
-.tax-rate-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,99,27,0.10); }
 
-/* Printer card */
-.printer-test-area { margin-top: var(--stack-md); }
-
-/* Add User Modal */
-.user-modal { max-width: 440px; }
-
-/* Footer note */
-.settings-note {
-  font-size: 12px; color: var(--on-surface-variant);
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  display: flex; gap: 8px; align-items: flex-start;
-  margin-top: var(--stack-md);
+.receipt-preview-box .rp-logo {
+  max-width: 64px;
+  max-height: 64px;
+  object-fit: contain;
+  margin: 0 auto 10px;
+  border-radius: 8px;
+  display: block;
 }
-.settings-note .material-symbols-outlined { font-size: 16px; color: var(--secondary); flex-shrink: 0; margin-top: 1px; }
+
+.receipt-preview-box h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #11110f;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+
+.receipt-preview-box p {
+  font-size: 10px;
+  color: #55554f;
+  margin: 0;
+}
+
+.receipt-preview-box .rp-divider {
+  border: none;
+  border-top: 1.5px dashed #a4a49c;
+  margin: 10px 0;
+}
+
+.receipt-preview-box .rp-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  letter-spacing: -0.02em;
+}
+
+.receipt-preview-box .rp-center {
+  text-align: center;
+  font-size: 10.5px;
+  color: #44443f;
+  margin-top: 6px;
+}
+
+/* ─── Tax Preview ────────────────────────────────────────────── */
+.tax-preview {
+  background: var(--surface-container-low);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1.5px solid var(--outline-variant);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tax-preview-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.tax-preview-row.total-row {
+  font-weight: 800;
+  color: var(--on-background);
+  border-top: 1.5px dashed var(--outline-variant);
+  padding-top: 10px;
+  margin-top: 4px;
+  font-size: 14.5px;
+}
+
+/* ─── Color Swatches for User Avatars ────────────────────────── */
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--tr-fast);
+  box-shadow: var(--shadow-xs);
+}
+
+.color-swatch:hover {
+  transform: scale(1.18);
+  box-shadow: var(--shadow-sm);
+}
+
+.color-swatch.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2.5px var(--primary);
+  transform: scale(1.08);
+}
+
+/* ─── Toggle Switches ────────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.toggle-info h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.toggle-info p {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  margin-top: 2px;
+  opacity: 0.8;
+}
+
+.toggle {
+  position: relative;
+  width: 46px;
+  height: 24px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--outline-variant);
+  transition: background var(--tr-normal);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: transform var(--tr-normal);
+}
+
+.toggle input:checked ~ .toggle-track {
+  background: var(--primary);
+}
+
+.toggle input:checked ~ .toggle-thumb {
+  transform: translateX(22px);
+}
+
+.toggle-divider {
+  height: 1px;
+  background: var(--outline-variant);
+  opacity: 0.6;
+}
+
+/* ─── Kategori Menu Grid (Fixed missing styles) ───────────────── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.cat-item {
+  background: var(--surface-container-lowest);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all var(--tr-fast);
+}
+
+.cat-item:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.cat-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(27, 109, 36, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.cat-item-icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.cat-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.cat-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-end;
+  border-top: 1px solid var(--outline-variant);
+  padding-top: 8px;
+}
+
+/* ─── User Table & System Cards ─────────────────────────────── */
+.user-avatar-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar-small {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14.5px;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.system-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface-container-low);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: 14px;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: all var(--tr-fast);
+}
+
+.system-action-card:hover {
+  border-color: var(--primary);
+  background: var(--surface-container);
+}
+
+.system-action-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.system-action-info p {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  margin-top: 2px;
+  opacity: 0.85;
+}

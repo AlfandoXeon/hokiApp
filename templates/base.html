@@ -1,95 +1,156 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="{{ app_settings.get('theme', 'light') }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}HokiApp{% endblock %} — Penyetan Hoki</title>
-  <meta name="description" content="Sistem manajemen transaksi dan stok Warung Penyetan Hoki">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} — {{ app_settings.get('nama_usaha', 'HokiApp') }}</title>
+  <meta name="description" content="Sistem POS dan manajemen warung makan profesional">
+  <meta name="theme-color" content="#1b6d24">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
+<div class="app-layout" id="appLayout">
 
-<div class="app-layout">
-  <!-- ── Sidebar ── -->
+  <!-- ── Sidebar Overlay (mobile) ── -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
   <aside class="sidebar" id="sidebar">
     <!-- Brand -->
     <div class="sidebar-brand">
-      <div class="sidebar-brand-icon">
-        <span class="material-symbols-outlined fill" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">restaurant</span>
+      <div class="sidebar-logo" id="sidebarLogoWrap">
+        {% if app_settings.get('logo_data') %}
+          <img id="sidebarLogoImg" src="{{ app_settings.get('logo_data') }}" alt="Logo">
+          <span class="material-symbols-outlined logo-fallback icon-fill" id="sidebarLogoFallback" style="display:none">restaurant</span>
+        {% else %}
+          <img id="sidebarLogoImg" src="" alt="Logo" style="display:none">
+          <span class="material-symbols-outlined logo-fallback icon-fill" id="sidebarLogoFallback">restaurant</span>
+        {% endif %}
       </div>
       <div class="sidebar-brand-text">
-        <h1>Penyetan Hoki</h1>
-        <p>Restaurant Manager</p>
+        <h1>{{ app_settings.get('nama_usaha', 'HokiApp') | truncate(22, True, '') }}</h1>
+        <p>Restaurant POS v2.0</p>
       </div>
     </div>
 
+    <!-- Collapse Toggle (desktop only) -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Collapse sidebar">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+
     <!-- Navigation -->
-    <nav class="sidebar-nav">
+    <nav class="sidebar-nav" id="sidebarNav">
+
+      <span class="nav-group-label">Menu Utama</span>
+
       <a href="{{ url_for('dashboard') }}"
          class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}"
-         id="nav-home">
-        <span class="material-symbols-outlined">home</span>
-        <span>Home</span>
+         data-label="Dashboard">
+        <span class="nav-icon">
+          <span class="material-symbols-outlined {% if request.endpoint == 'dashboard' %}icon-fill{% endif %}">home</span>
+        </span>
+        <span class="nav-label">Dashboard</span>
       </a>
 
       <a href="{{ url_for('kasir') }}"
          class="nav-item {% if request.endpoint in ['kasir', 'payment'] %}active{% endif %}"
-         id="nav-kasir">
-        <span class="material-symbols-outlined">point_of_sale</span>
-        <span>Kasir</span>
+         data-label="Kasir">
+        <span class="nav-icon">
+          <span class="material-symbols-outlined {% if request.endpoint in ['kasir', 'payment'] %}icon-fill{% endif %}">point_of_sale</span>
+        </span>
+        <span class="nav-label">Kasir</span>
+        <span class="nav-badge" id="pendingNavBadge" style="display:none">0</span>
       </a>
 
       <a href="{{ url_for('stock') }}"
          class="nav-item {% if request.endpoint == 'stock' %}active{% endif %}"
-         id="nav-stock">
-        <span class="material-symbols-outlined">inventory_2</span>
-        <span>Manajemen Stock</span>
+         data-label="Manajemen Stock">
+        <span class="nav-icon">
+          <span class="material-symbols-outlined {% if request.endpoint == 'stock' %}icon-fill{% endif %}">inventory_2</span>
+        </span>
+        <span class="nav-label">Manajemen Stock</span>
       </a>
 
-      {% if session.get('role') == 'admin' %}
+      {% if current_user.role == 'admin' %}
+      <span class="nav-group-label">Admin</span>
+
+      <a href="{{ url_for('laporan') }}"
+         class="nav-item {% if request.endpoint == 'laporan' %}active{% endif %}"
+         data-label="Laporan Keuangan">
+        <span class="nav-icon">
+          <span class="material-symbols-outlined {% if request.endpoint == 'laporan' %}icon-fill{% endif %}">analytics</span>
+        </span>
+        <span class="nav-label">Laporan Keuangan</span>
+      </a>
+
       <a href="{{ url_for('settings') }}"
          class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}"
-         id="nav-settings">
-        <span class="material-symbols-outlined">settings</span>
-        <span>Pengaturan</span>
+         data-label="Pengaturan">
+        <span class="nav-icon">
+          <span class="material-symbols-outlined {% if request.endpoint == 'settings' %}icon-fill{% endif %}">settings</span>
+        </span>
+        <span class="nav-label">Pengaturan</span>
       </a>
       {% endif %}
     </nav>
 
-    <!-- Footer: Logout -->
+    <!-- User Info + Logout -->
     <div class="sidebar-footer">
-      <a href="{{ url_for('logout') }}" class="nav-item logout">
-        <span class="material-symbols-outlined">logout</span>
-        <span>Logout</span>
+      <div class="sidebar-user" style="margin-bottom:4px">
+        <div class="sidebar-avatar">
+          {{ (current_user.nama_lengkap or current_user.username or 'U')[0] | upper }}
+        </div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ current_user.nama_lengkap or current_user.username }}</div>
+          <div class="sidebar-user-role">{{ current_user.role | capitalize }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="nav-item danger" data-label="Logout">
+        <span class="nav-icon"><span class="material-symbols-outlined">logout</span></span>
+        <span class="nav-label">Logout</span>
       </a>
     </div>
   </aside>
 
-  <!-- ── Main Content ── -->
-  {% block main_wrapper_open %}
-  <div class="main-content">
-  {% endblock %}
+  <!-- ══════════════ MAIN CONTENT ══════════════ -->
+  {% block main_wrapper_open %}<div class="main-content" id="mainContent">{% endblock %}
 
     <!-- Top Bar -->
-    <header class="top-bar">
-      <div class="top-bar-left">
-        <div class="breadcrumb">
-          <span>{% block breadcrumb_parent %}Home{% endblock %}</span>
-          {% block breadcrumb_current %}{% endblock %}
+    <header class="topbar">
+      <div class="topbar-left">
+        <!-- Hamburger (mobile) -->
+        <button class="topbar-hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+
+        <div class="topbar-title-group">
+          <div class="topbar-breadcrumb">
+            <span>{% block breadcrumb_parent %}HokiApp{% endblock %}</span>
+            {% block breadcrumb_sep %}<span class="material-symbols-outlined icon-xs">chevron_right</span>{% endblock %}
+            <span style="color:var(--primary);font-weight:600">{% block breadcrumb_current %}Dashboard{% endblock %}</span>
+          </div>
+          <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
         </div>
-        <span class="top-bar-title">{% block page_title %}Dashboard{% endblock %}</span>
       </div>
-      <div class="top-bar-right">
-        <button class="icon-btn" title="Notifikasi">
+
+      <div class="topbar-right">
+        <!-- Theme Toggle -->
+        <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle dark mode">
+          <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+        </button>
+
+        <!-- Notifications -->
+        <button class="icon-btn" id="notifBtn" title="Peringatan stok">
           <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-dot" id="notifDot" style="display:none"></span>
         </button>
-        <button class="icon-btn" title="Bantuan">
-          <span class="material-symbols-outlined">help</span>
-        </button>
-        <!-- User avatar -->
-        <div class="avatar-circle" title="{{ session.get('nama_lengkap', session.get('username', '')) }}">
-          {{ (session.get('nama_lengkap', session.get('username', 'U'))[0] | upper) }}
+
+        <!-- User Avatar Dropdown Trigger -->
+        <div class="topbar-avatar" id="avatarBtn" onclick="showUserMenu()" title="{{ current_user.nama_lengkap }}">
+          {{ (current_user.nama_lengkap or current_user.username or 'U')[0] | upper }}
         </div>
       </div>
     </header>
@@ -97,15 +158,13 @@
     <!-- Page Content -->
     {% block content %}{% endblock %}
 
-  {% block main_wrapper_close %}
-  </div>
-  {% endblock %}
+  {% block main_wrapper_close %}</div>{% endblock %}
 </div>
 
-<!-- Toast Container -->
+<!-- ── Toast Container ── -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Global JS -->
+<!-- ── Global JS ── -->
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% block extra_js %}{% endblock %}
 </body>

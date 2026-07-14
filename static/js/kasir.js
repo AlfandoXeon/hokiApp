@@ -1,276 +1,281 @@
 /* ============================================================
-   HokiApp — Kasir Logic (kasir.js)
+   HokiApp v2.0 — Kasir POS Logic (kasir.js)
    ============================================================ */
-
 'use strict';
 
-// ─── State ───────────────────────────────────────────────────
-let allProducts    = [];
-let allCategories  = [];
-let cart           = [];  // { product_id, name, price, qty, notes }
-let currentTxnId   = null;
-let taxEnabled     = true;
-let taxRate        = 0.10;
-let editNoteIndex  = null;
+// ─── State ────────────────────────────────────────────────────
+let cart         = [];    // [{product, qty, note}]
+let allProducts  = [];
+let allCategories= [];
+let activeCategory = 'all';
+let activeNoteIndex= null;
+let pendingOrders  = [];
+let settings       = {};
+let taxRate        = 0;
+let taxEnabled     = false;
+let discountEnabled= false;
 
-// ─── Init ────────────────────────────────────────────────────
+// Test mode mock for native confirm
+if (window.location.search.includes('test=1')) {
+  window.confirm = () => true;
+}
+
+// ─── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  await Promise.all([loadSettings(), loadCategories(), loadProducts()]);
-  setupSearch();
-  loadPendingCount();
-
-  // Pending orders button
-  document.getElementById('btnPendingOrders')?.addEventListener('click', openPendingOrders);
-  document.getElementById('btnClearCart')?.addEventListener('click', clearCart);
+  await loadSettings();
+  await Promise.all([loadProducts(), loadCategories()]);
+  initSearch();
+  loadPendingBadge();
 });
 
-// ─── Load Settings (tax) ─────────────────────────────────────
+// ─── Settings ─────────────────────────────────────────────────
 async function loadSettings() {
   try {
-    const s = await fetchAPI('/api/settings');
-    taxEnabled = s.tax_enabled === '1';
-    taxRate    = parseFloat(s.tax_rate || '10') / 100;
-    document.getElementById('taxRateLabel').textContent = s.tax_rate || '10';
-    document.getElementById('taxRow').style.display = taxEnabled ? '' : 'none';
-  } catch (_) {}
-}
+    settings = await fetchAPI('/api/settings');
+    taxEnabled     = settings.tax_enabled !== '0';
+    taxRate        = parseFloat(settings.tax_rate) || 0;
+    discountEnabled= settings.discount_enabled !== '0';
 
-// ─── Categories ──────────────────────────────────────────────
-async function loadCategories() {
-  try {
-    allCategories = await fetchAPI('/api/categories');
-    renderCategoryChips();
+    // Show/hide UI based on settings
+    const taxRow = document.getElementById('taxRow');
+    if (taxRow) taxRow.style.display = taxEnabled ? '' : 'none';
+
+    const taxLabel = document.getElementById('taxRateLabel');
+    if (taxLabel) taxLabel.textContent = taxRate;
+
+    const discountRow = document.getElementById('discountRow');
+    if (discountRow) discountRow.style.display = discountEnabled ? '' : 'none';
+
+    const custInput = document.getElementById('customerName');
+    if (custInput && settings.customer_name_enabled === '0') custInput.style.display = 'none';
+
+    const tableInput = document.getElementById('tableNumber');
+    if (tableInput && settings.table_number_enabled === '0') tableInput.style.display = 'none';
   } catch (err) {
-    showToast('Gagal memuat kategori', 'error');
+    console.warn('Gagal load settings:', err.message);
   }
 }
 
-function renderCategoryChips() {
-  const bar = document.getElementById('categoryBar');
-  if (!bar) return;
-
-  // Keep the "Semua Menu" chip
-  const allChip = bar.querySelector('[data-category="all"]');
-  bar.innerHTML = '';
-  if (allChip) bar.appendChild(allChip);
-
-  allCategories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'chip';
-    btn.dataset.category = cat.id;
-    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px">${cat.icon || 'category'}</span> ${cat.name}`;
-    btn.addEventListener('click', () => filterByCategory(cat.id, btn));
-    bar.appendChild(btn);
-  });
-
-  // Activate 'all' by default
-  document.getElementById('chip-all')?.addEventListener('click', () => filterByCategory('all', document.getElementById('chip-all')));
-}
-
-function filterByCategory(categoryId, activeBtn) {
-  document.querySelectorAll('#categoryBar .chip').forEach(c => c.classList.remove('active'));
-  activeBtn.classList.add('active');
-  renderMenuGrid(categoryId === 'all' ? null : categoryId);
-}
-
-// ─── Products / Menu ─────────────────────────────────────────
+// ─── Products ─────────────────────────────────────────────────
 async function loadProducts() {
-  try {
-    allProducts = await fetchAPI('/api/products');
-    renderMenuGrid();
-  } catch (err) {
-    document.getElementById('menuGrid').innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--on-surface-variant)">
-        Gagal memuat menu: ${err.message}
-      </div>`;
-  }
-}
-
-function renderMenuGrid(categoryId = null, searchTerm = '') {
   const grid = document.getElementById('menuGrid');
   if (!grid) return;
 
-  let filtered = allProducts;
-  if (categoryId) filtered = filtered.filter(p => p.category_id == categoryId);
-  if (searchTerm) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  try {
+    allProducts = await fetchAPI('/api/products');
+    renderMenuGrid(allProducts);
+  } catch (err) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--error)">
+      Gagal memuat menu: ${err.message}</div>`;
+  }
+}
 
-  if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div style="grid-column:1/-1" class="empty-state">
-        <span class="material-symbols-outlined">search_off</span>
-        <p>Tidak ada menu yang cocok</p>
-      </div>`;
+// ─── Categories ───────────────────────────────────────────────
+async function loadCategories() {
+  try {
+    allCategories = await fetchAPI('/api/categories');
+    const bar = document.getElementById('categoryBar');
+    if (!bar) return;
+
+    allCategories.forEach(cat => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.id = `chip-${cat.id}`;
+      chip.dataset.category = cat.id;
+      chip.onclick = () => filterByCategory(cat.id, chip);
+      chip.innerHTML = `<span class="material-symbols-outlined icon-xs">${cat.icon || 'category'}</span> ${cat.name}`;
+      bar.appendChild(chip);
+    });
+  } catch (err) {
+    console.warn('Gagal load kategori:', err.message);
+  }
+}
+
+// ─── Filter ───────────────────────────────────────────────────
+function filterByCategory(catId, el) {
+  activeCategory = catId;
+  document.querySelectorAll('#categoryBar .chip').forEach(c => c.classList.remove('active'));
+  el?.classList.add('active');
+
+  const q = document.getElementById('menuSearch')?.value.toLowerCase() || '';
+  applyFilters(q);
+}
+
+function initSearch() {
+  const input = document.getElementById('menuSearch');
+  if (!input) return;
+  input.addEventListener('input', debounce((e) => {
+    applyFilters(e.target.value.toLowerCase());
+  }, 200));
+}
+
+function applyFilters(query = '') {
+  let filtered = allProducts;
+
+  if (activeCategory !== 'all') {
+    filtered = filtered.filter(p => String(p.category_id) === String(activeCategory));
+  }
+  if (query) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(query) ||
+      (p.category_name || '').toLowerCase().includes(query)
+    );
+  }
+  renderMenuGrid(filtered);
+}
+
+// ─── Render Menu Grid ─────────────────────────────────────────
+function renderMenuGrid(products) {
+  const grid = document.getElementById('menuGrid');
+  if (!grid) return;
+
+  if (!products || products.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1">
+      <div class="empty-state">
+        <span class="material-symbols-outlined">restaurant_menu</span>
+        <h3>Menu tidak ditemukan</h3>
+        <p>Coba kata kunci atau kategori lain</p>
+      </div>
+    </div>`;
     return;
   }
 
-  grid.innerHTML = filtered.map(p => {
-    const isOutOfStock = p.stock_qty <= 0 || !p.is_available;
-    const cartItem = cart.find(c => c.product_id === p.id);
-    const inCart   = cartItem ? cartItem.qty : 0;
-
-    const imageHtml = p.image_path
-      ? `<img src="${p.image_path}" alt="${p.name}" loading="lazy">`
-      : `<span class="material-symbols-outlined menu-placeholder-icon">restaurant</span>`;
-
-    return `
-      <div class="menu-card ${isOutOfStock ? 'out-of-stock' : ''}"
-           data-id="${p.id}"
-           onclick="${isOutOfStock ? '' : `addToCart(${p.id})`}">
-        <div class="menu-card-image">
-          ${imageHtml}
-          ${isOutOfStock ? `<div class="out-of-stock-badge">HABIS</div>` : ''}
-          ${inCart > 0 ? `<div class="menu-card-qty-badge" id="qbadge-${p.id}">${inCart}</div>` : ''}
-          ${!isOutOfStock ? `<div class="menu-card-overlay"><div class="menu-card-add-hint"><span class="material-symbols-outlined" style="font-size:18px;margin-right:4px">add_circle</span>Tambah</div></div>` : ''}
-        </div>
-        <div class="menu-card-body">
-          <div class="menu-card-name">${p.name}</div>
-          <div class="menu-card-price">${formatRupiah(p.price)}</div>
-          <div class="menu-card-stock text-muted">${p.stock_qty} ${p.stock_unit}</div>
-        </div>
-      </div>`;
-  }).join('');
+  grid.innerHTML = products.map(p => buildMenuCard(p)).join('');
 }
 
-// ─── Search ─────────────────────────────────────────────────
-function setupSearch() {
-  // Search is in the top bar for kasir page
-  const searchContainer = document.querySelector('.search-input-wrapper');
-  if (!searchContainer) return;
+function buildMenuCard(product) {
+  const isOutOfStock  = product.stock !== null && product.stock <= 0;
+  const cartItem      = cart.find(c => c.product.id === product.id);
+  const cartQty       = cartItem ? cartItem.qty : 0;
+  const hasImage      = product.has_image;
 
-  const input = searchContainer.querySelector('.search-input');
-  if (input) {
-    input.addEventListener('input', debounce((e) => {
-      const activeCat = document.querySelector('#categoryBar .chip.active');
-      const catId = activeCat?.dataset.category === 'all' ? null : activeCat?.dataset.category;
-      renderMenuGrid(catId, e.target.value);
-    }, 200));
-  }
+  // Stock bar
+  const maxStock   = Math.max(product.stock_max || 50, product.stock || 1);
+  const pct        = product.stock !== null ? Math.min(100, Math.round((product.stock / maxStock) * 100)) : 100;
+  const stockClass = product.stock <= 0 ? 'empty' : product.stock <= 5 ? 'critical' : product.stock <= 10 ? 'low' : 'safe';
+  const stockText  = product.stock !== null ? `Stok: ${product.stock} ${product.unit || ''}` : 'Stok tidak terbatas';
+
+  return `
+    <div class="menu-card ${isOutOfStock ? 'out-of-stock' : ''} ${cartQty > 0 ? 'in-cart' : ''}"
+         id="mc-${product.id}"
+         onclick="${isOutOfStock ? '' : `addToCart(${product.id})`}">
+
+      <div class="menu-card-image">
+        ${hasImage
+          ? `<img src="/api/products/${product.id}/image" alt="${product.name}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''
+        }
+        <span class="material-symbols-outlined icon-fill" ${hasImage ? 'style="display:none"' : ''}>restaurant</span>
+
+        ${isOutOfStock ? '<div class="out-of-stock-badge">HABIS</div>' : ''}
+        ${cartQty > 0 ? `<div class="menu-card-qty-badge">${cartQty}</div>` : ''}
+
+        ${!isOutOfStock ? `<div class="menu-card-add-overlay">
+          <span class="material-symbols-outlined icon-fill">add_circle</span>
+        </div>` : ''}
+      </div>
+
+      <div class="menu-card-body">
+        <div class="menu-card-name">${product.name}</div>
+        <div class="menu-card-price">${formatRupiah(product.price)}</div>
+        <div class="menu-card-stock">${stockText}</div>
+        ${product.stock !== null ? `
+        <div class="menu-card-stock-bar">
+          <div class="menu-card-stock-bar-fill ${stockClass}" style="width:${pct}%"></div>
+        </div>` : ''}
+      </div>
+    </div>`;
 }
 
-// ─── Cart Management ─────────────────────────────────────────
+// ─── Cart ──────────────────────────────────────────────────────
 function addToCart(productId) {
   const product = allProducts.find(p => p.id === productId);
   if (!product) return;
 
-  const existing = cart.find(c => c.product_id === productId);
+  if (product.stock !== null && product.stock <= 0) {
+    showToast(`${product.name} sudah habis!`, 'warning');
+    return;
+  }
+
+  const existing = cart.find(c => c.product.id === productId);
   if (existing) {
+    if (product.stock !== null && existing.qty >= product.stock) {
+      showToast(`Stok ${product.name} tidak cukup!`, 'warning');
+      return;
+    }
     existing.qty++;
   } else {
-    cart.push({
-      product_id: productId,
-      name:  product.name,
-      price: product.price,
-      qty:   1,
-      notes: '',
-    });
+    cart.push({ product, qty: 1, note: '' });
   }
 
   updateCartUI();
-  // Update quantity badge on menu card
-  updateMenuCardBadge(productId);
+  refreshMenuCard(productId);
 }
 
 function updateQty(index, delta) {
-  if (!cart[index]) return;
-  cart[index].qty += delta;
-  if (cart[index].qty <= 0) {
-    const prodId = cart[index].product_id;
-    cart.splice(index, 1);
-    updateMenuCardBadge(prodId, true);
-  } else {
-    updateMenuCardBadge(cart[index].product_id);
+  if (index < 0 || index >= cart.length) return;
+  const item = cart[index];
+  const newQty = item.qty + delta;
+
+  if (newQty <= 0) {
+    removeFromCart(index);
+    return;
   }
+
+  if (delta > 0 && item.product.stock !== null && newQty > item.product.stock) {
+    showToast('Stok tidak cukup!', 'warning');
+    return;
+  }
+
+  item.qty = newQty;
   updateCartUI();
+  refreshMenuCard(item.product.id);
 }
 
 function removeFromCart(index) {
-  const prodId = cart[index]?.product_id;
+  const productId = cart[index]?.product.id;
   cart.splice(index, 1);
-  if (prodId) updateMenuCardBadge(prodId, true);
   updateCartUI();
+  if (productId) refreshMenuCard(productId);
 }
 
 function clearCart() {
   if (cart.length === 0) return;
   if (!confirm('Bersihkan semua item di keranjang?')) return;
+  const productIds = cart.map(c => c.product.id);
   cart = [];
-  currentTxnId = null;
   updateCartUI();
-  // Remove all badges
-  document.querySelectorAll('[id^="qbadge-"]').forEach(el => el.remove());
+  productIds.forEach(id => refreshMenuCard(id));
+  document.getElementById('customerName').value = '';
+  document.getElementById('tableNumber').value  = '';
 }
 
-function updateMenuCardBadge(productId, remove = false) {
-  const badgeId = `qbadge-${productId}`;
-  let badge = document.getElementById(badgeId);
-  const cartItem = cart.find(c => c.product_id === productId);
-  const qty = cartItem?.qty || 0;
-
-  if (remove || qty === 0) {
-    badge?.remove();
-    return;
-  }
-
-  const imgDiv = document.querySelector(`.menu-card[data-id="${productId}"] .menu-card-image`);
-  if (!imgDiv) return;
-
-  if (!badge) {
-    badge = document.createElement('div');
-    badge.id = badgeId;
-    badge.className = 'menu-card-qty-badge';
-    imgDiv.appendChild(badge);
-  }
-  badge.textContent = qty;
-}
-
-// ─── Note Modal ──────────────────────────────────────────────
-function openNoteModal(index) {
-  editNoteIndex = index;
-  const item = cart[index];
-  if (!item) return;
-  document.getElementById('noteModalItemName').textContent = item.name;
-  document.getElementById('noteInput').value = item.notes || '';
-  openModal('noteModal');
-}
-
-function saveItemNote() {
-  if (editNoteIndex === null) return;
-  cart[editNoteIndex].notes = document.getElementById('noteInput').value.trim();
-  updateCartUI();
-  closeModal('noteModal');
-}
-
-// ─── Render Cart UI ──────────────────────────────────────────
+// ─── Cart UI ──────────────────────────────────────────────────
 function updateCartUI() {
-  const emptyState = document.getElementById('cartEmptyState');
-  const cartList   = document.getElementById('cartItemsList');
-  const footer     = document.getElementById('cartFooter');
-  if (!cartList) return;
+  const scroll = document.getElementById('cartScroll');
+  const footer = document.getElementById('cartFooter');
+  const badge  = document.getElementById('cartCountBadge');
+  const payBtn = document.getElementById('btnPay');
+  if (!scroll) return;
+
+  // Count
+  const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+  if (badge) badge.textContent = totalQty;
 
   if (cart.length === 0) {
-    // Show empty state inside list
-    cartList.innerHTML = `
-      <div class="cart-empty" id="cartEmptyState">
-        <span class="material-symbols-outlined">shopping_cart</span>
-        <p>Keranjang kosong<br>Pilih menu untuk menambahkan</p>
-      </div>`;
+    scroll.innerHTML = `<div class="cart-empty">
+      <span class="material-symbols-outlined icon-fill" style="opacity:0.2">shopping_basket</span>
+      <p>Pilih menu untuk<br>menambahkan ke keranjang</p>
+    </div>`;
     if (footer) footer.style.display = 'none';
+    if (payBtn) payBtn.disabled = true;
     return;
   }
 
-  if (footer) footer.style.display = '';
-
-  cartList.innerHTML = cart.map((item, i) => `
-    <div class="cart-item" id="cartItem-${i}">
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price-sub">${formatRupiah(item.price)} × ${item.qty} = <strong>${formatRupiah(item.price * item.qty)}</strong></div>
-        ${item.notes ? `<div class="cart-item-note">📝 ${item.notes}</div>` : ''}
-        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;height:auto;font-size:11px;margin-top:4px;color:var(--on-surface-variant)" onclick="openNoteModal(${i})">
-          <span class="material-symbols-outlined" style="font-size:14px">edit_note</span>
-          ${item.notes ? 'Edit catatan' : 'Tambah catatan'}
-        </button>
-      </div>
+  // Items
+  scroll.innerHTML = cart.map((item, i) => `
+    <div class="cart-item">
       <div class="qty-stepper">
         <button class="qty-btn" onclick="updateQty(${i}, -1)">
           <span class="material-symbols-outlined">remove</span>
@@ -280,165 +285,245 @@ function updateCartUI() {
           <span class="material-symbols-outlined">add</span>
         </button>
       </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name truncate">${item.product.name}</div>
+        <div class="cart-item-price">${formatRupiah(item.product.price)} × ${item.qty}</div>
+        ${item.note ? `<div class="cart-item-note">
+          <span class="material-symbols-outlined icon-xs">sticky_note_2</span> ${item.note}
+        </div>` : ''}
+        <div style="display:flex;gap:4px;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px;min-height:unset"
+            onclick="openNoteModal(${i})">
+            <span class="material-symbols-outlined" style="font-size:14px">edit_note</span>
+            ${item.note ? 'Ubah' : 'Catatan'}
+          </button>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 6px;min-height:unset;color:var(--error)"
+            onclick="removeFromCart(${i})">
+            <span class="material-symbols-outlined" style="font-size:14px">delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="cart-item-subtotal">${formatRupiah(item.product.price * item.qty)}</div>
     </div>
-    ${i < cart.length - 1 ? '<hr class="cart-divider">' : ''}
   `).join('');
 
-  // Update totals
-  const subtotal = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
-  const tax      = taxEnabled ? Math.round(subtotal * taxRate) : 0;
-  const total    = subtotal + tax;
+  // Totals
+  const subtotal  = cart.reduce((s, i) => s + (i.product.price * i.qty), 0);
+  const discount  = discountEnabled ? (parseFloat(document.getElementById('discountInput')?.value) || 0) : 0;
+  const taxAmt    = taxEnabled ? Math.round((subtotal - discount) * taxRate / 100) : 0;
+  const total     = Math.max(0, subtotal - discount + taxAmt);
 
   document.getElementById('cartSubtotal').textContent = formatRupiah(subtotal);
-  document.getElementById('cartTax').textContent = formatRupiah(tax);
-  document.getElementById('cartTotal').textContent = formatRupiah(total);
+  document.getElementById('cartDiscount').textContent = `- ${formatRupiah(discount)}`;
+  document.getElementById('cartTax').textContent       = formatRupiah(taxAmt);
+  document.getElementById('cartTotal').textContent     = formatRupiah(total);
 
-  // Enable/disable pay button
-  const btnPay = document.getElementById('btnPay');
-  if (btnPay) btnPay.disabled = cart.length === 0;
+  const discTotalRow = document.getElementById('discountTotalRow');
+  if (discTotalRow) discTotalRow.style.display = (discount > 0) ? '' : 'none';
+
+  if (footer) footer.style.display = '';
+  if (payBtn) payBtn.disabled = false;
 }
 
-// ─── Save Bill (Pending) ─────────────────────────────────────
-async function saveBill() {
-  if (cart.length === 0) return showToast('Keranjang masih kosong.', 'warning');
+function refreshMenuCard(productId) {
+  const card = document.getElementById(`mc-${productId}`);
+  if (!card) return;
 
-  try {
-    let data;
-    if (currentTxnId) {
-      // Update existing pending transaction
-      data = await fetchAPI(`/api/transactions/${currentTxnId}`, {
-        method: 'PUT',
-        body: { action: 'update_items', items: cart.map(c => ({...c, qty: c.qty})) }
-      });
-      showToast('Bill diperbarui.', 'success');
+  const cartItem = cart.find(c => c.product.id === productId);
+  const qty = cartItem ? cartItem.qty : 0;
+
+  // Update qty badge
+  const qtyBadge = card.querySelector('.menu-card-qty-badge');
+  if (qty > 0) {
+    if (qtyBadge) {
+      qtyBadge.textContent = qty;
     } else {
-      data = await fetchAPI('/api/transactions', {
-        method: 'POST',
-        body: { items: cart.map(c => ({ product_id: c.product_id, name: c.name, price: c.price, qty: c.qty, notes: c.notes })) }
-      });
-      currentTxnId = data.id;
-      showToast(`Bill disimpan — ${data.order_code}`, 'success');
-    }
-    loadPendingCount();
-  } catch (err) {
-    showToast('Gagal menyimpan bill: ' + err.message, 'error');
-  }
-}
-
-// ─── Proceed to Payment ──────────────────────────────────────
-async function proceedToPayment() {
-  if (cart.length === 0) return showToast('Keranjang masih kosong.', 'warning');
-
-  try {
-    let txnId = currentTxnId;
-
-    if (!txnId) {
-      // Create new transaction
-      const data = await fetchAPI('/api/transactions', {
-        method: 'POST',
-        body: { items: cart.map(c => ({ product_id: c.product_id, name: c.name, price: c.price, qty: c.qty, notes: c.notes })) }
-      });
-      txnId = data.id;
-    } else {
-      // Update existing
-      await fetchAPI(`/api/transactions/${txnId}`, {
-        method: 'PUT',
-        body: { action: 'update_items', items: cart.map(c => ({...c, qty: c.qty})) }
-      });
-    }
-
-    window.location.href = `/payment/${txnId}`;
-  } catch (err) {
-    showToast('Gagal memproses: ' + err.message, 'error');
-  }
-}
-
-// ─── Cancel Current Order ─────────────────────────────────────
-async function cancelCurrentOrder() {
-  if (cart.length === 0) return;
-  if (!confirm('Batalkan pesanan ini?')) return;
-
-  if (currentTxnId) {
-    try {
-      await fetchAPI(`/api/transactions/${currentTxnId}`, {
-        method: 'PUT',
-        body: { action: 'cancel' }
-      });
-    } catch (_) {}
-  }
-
-  cart = [];
-  currentTxnId = null;
-  updateCartUI();
-  document.querySelectorAll('[id^="qbadge-"]').forEach(el => el.remove());
-  showToast('Pesanan dibatalkan.', 'info');
-  loadPendingCount();
-}
-
-// ─── Pending Orders ─────────────────────────────────────────
-async function loadPendingCount() {
-  try {
-    const data = await fetchAPI('/api/transactions/pending');
-    const countEl = document.getElementById('pendingCount');
-    if (countEl) {
-      if (data.length > 0) {
-        countEl.textContent = data.length;
-        countEl.style.display = 'flex';
-      } else {
-        countEl.style.display = 'none';
+      const imgDiv = card.querySelector('.menu-card-image');
+      if (imgDiv) {
+        const newBadge = document.createElement('div');
+        newBadge.className = 'menu-card-qty-badge';
+        newBadge.textContent = qty;
+        imgDiv.appendChild(newBadge);
       }
     }
-  } catch (_) {}
+    card.classList.add('in-cart');
+  } else {
+    qtyBadge?.remove();
+    card.classList.remove('in-cart');
+  }
 }
 
+// ─── Note Modal ───────────────────────────────────────────────
+function openNoteModal(index) {
+  activeNoteIndex = index;
+  const item = cart[index];
+  if (!item) return;
+  document.getElementById('noteModalItemName').textContent = item.product.name;
+  document.getElementById('noteInput').value = item.note || '';
+  openModal('noteModal');
+}
+
+function saveItemNote() {
+  if (activeNoteIndex === null) return;
+  const note = document.getElementById('noteInput').value.trim();
+  cart[activeNoteIndex].note = note;
+  closeModal('noteModal');
+  updateCartUI();
+}
+
+// ─── Save Bill (Pending) ──────────────────────────────────────
+async function saveBill() {
+  if (cart.length === 0) return;
+  const btn = document.getElementById('btnSaveBill');
+  btn.disabled = true;
+  try {
+    const payload = buildPayload('pending');
+    const result  = await fetchAPI('/api/transactions', { method: 'POST', body: payload });
+    showToast(`Order ${result.order_code} disimpan sebagai pending.`, 'success');
+    clearCartSilent();
+    loadPendingBadge();
+  } catch (err) {
+    showToast('Gagal simpan: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── Payment ──────────────────────────────────────────────────
+function proceedToPayment() {
+  if (cart.length === 0) return;
+
+  const subtotal = cart.reduce((s, i) => s + (i.product.price * i.qty), 0);
+  const discount = discountEnabled ? (parseFloat(document.getElementById('discountInput')?.value) || 0) : 0;
+  const taxAmt   = taxEnabled ? Math.round((subtotal - discount) * taxRate / 100) : 0;
+  const total    = Math.max(0, subtotal - discount + taxAmt);
+  const payload  = buildPayload('pending');
+
+  // Encode payload and redirect to payment page
+  localStorage.setItem('hoki_checkout_cart', JSON.stringify({ ...payload, subtotal, discount, taxAmt, total }));
+  window.location.href = '/payment';
+}
+
+function buildPayload(status = 'pending') {
+  const subtotal = cart.reduce((s, i) => s + (i.product.price * i.qty), 0);
+  const discount = discountEnabled ? (parseFloat(document.getElementById('discountInput')?.value) || 0) : 0;
+  const taxAmt   = taxEnabled ? Math.round((subtotal - discount) * taxRate / 100) : 0;
+  const total    = Math.max(0, subtotal - discount + taxAmt);
+  return {
+    customer_name: document.getElementById('customerName')?.value.trim() || '',
+    table_number:  document.getElementById('tableNumber')?.value.trim()  || '',
+    items: cart.map(c => ({
+      product_id: c.product.id,
+      qty: c.qty,
+      price: c.product.price,
+      note: c.note || '',
+    })),
+    subtotal,
+    discount,
+    tax: taxAmt,
+    total,
+    status,
+    payment_method: 'tunai',
+  };
+}
+
+// ─── Pending Orders ───────────────────────────────────────────
 async function openPendingOrders() {
-  openModal('pendingModal');
   const list = document.getElementById('pendingList');
   if (!list) return;
-
-  list.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  list.innerHTML = '<div class="empty-state"><div class="spinner"></div><p>Memuat...</p></div>';
+  openModal('pendingModal');
 
   try {
-    const txns = await fetchAPI('/api/transactions/pending');
-
-    if (txns.length === 0) {
-      list.innerHTML = '<div class="empty-state"><p>Tidak ada pesanan pending</p></div>';
+    pendingOrders = await fetchAPI('/api/transactions/pending');
+    if (pendingOrders.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="padding:30px"><span class="material-symbols-outlined">inbox</span><p>Tidak ada pesanan pending</p></div>';
       return;
     }
-
-    list.innerHTML = txns.map(t => `
-      <div class="pending-item ${currentTxnId === t.id ? 'selected' : ''}"
-           onclick="loadPendingOrder(${t.id})">
+    list.innerHTML = pendingOrders.map(order => `
+      <div class="pending-item" onclick="loadPendingOrder(${order.id})">
         <div>
-          <div style="font-weight:700">#${t.order_code}</div>
-          <div style="font-size:12px;color:var(--on-surface-variant)">${formatDateTime(t.created_at)}</div>
+          <div class="pending-item-code">#${order.order_code}</div>
+          <div class="pending-item-time">${formatDateTime(order.created_at)}
+            ${order.customer_name ? ` · ${order.customer_name}` : ''}
+            ${order.table_number ? ` · Meja ${order.table_number}` : ''}</div>
+          <div class="text-xs text-muted mt-xs">${(order.items || []).map(i => `${i.qty}× ${i.product_name}`).join(', ')}</div>
         </div>
-        <div style="font-weight:700;color:var(--primary)">${formatRupiah(t.total)}</div>
+        <div class="pending-item-right" style="display:flex;align-items:center;gap:12px">
+          <div class="pending-item-total">${formatRupiah(order.total)}</div>
+          <button class="btn-delete-pending" onclick="event.stopPropagation(); deletePendingOrder(${order.id}, '${order.order_code}')" title="Hapus Pesanan">
+            <span class="material-symbols-outlined icon-sm">delete</span>
+          </button>
+        </div>
       </div>
     `).join('');
   } catch (err) {
-    list.innerHTML = `<p style="text-align:center;padding:20px;color:var(--error)">Error: ${err.message}</p>`;
+    list.innerHTML = `<div class="empty-state"><p style="color:var(--error)">Gagal: ${err.message}</p></div>`;
   }
 }
 
-async function loadPendingOrder(txnId) {
+async function loadPendingOrder(orderId) {
+  const order = pendingOrders.find(o => o.id === orderId);
+  if (!order) return;
+
+  // Replace cart with pending order items
+  cart = (order.items || []).map(i => {
+    const product = allProducts.find(p => p.id === i.product_id) || {
+      id: i.product_id, name: i.product_name, price: i.product_price || i.price, stock: null
+    };
+    return { product, qty: i.quantity || 1, note: i.notes || '' };
+  });
+
+  if (document.getElementById('customerName')) document.getElementById('customerName').value = order.customer_name || '';
+  if (document.getElementById('tableNumber'))  document.getElementById('tableNumber').value  = order.table_number || '';
+
+  updateCartUI();
+  allProducts.forEach(p => refreshMenuCard(p.id));
+  closeModal('pendingModal');
+  showToast(`Order #${order.order_code} dimuat ke kasir.`, 'success');
+}
+
+async function deletePendingOrder(orderId, orderCode) {
+  if (!confirm(`Hapus pesanan pending #${orderCode}? Aksi ini tidak dapat dibatalkan.`)) return;
   try {
-    const data = await fetchAPI(`/api/transactions/${txnId}`);
-    cart = data.items.map(item => ({
-      product_id: item.product_id,
-      name:  item.product_name,
-      price: item.product_price,
-      qty:   item.quantity,
-      notes: item.notes || '',
-    }));
-    currentTxnId = txnId;
-    updateCartUI();
-    // Update menu badges
-    document.querySelectorAll('[id^="qbadge-"]').forEach(el => el.remove());
-    cart.forEach(c => updateMenuCardBadge(c.product_id));
-    closeModal('pendingModal');
-    showToast(`Pesanan #${data.order_code} dimuat ke keranjang.`, 'success');
+    const result = await fetchAPI(`/api/transactions/${orderId}`, {
+      method: 'DELETE'
+    });
+    showToast(result.message || 'Pesanan pending berhasil dihapus.', 'success');
+    // Refresh modal list
+    await openPendingOrders();
+    // Update badge numbers
+    await loadPendingBadge();
   } catch (err) {
-    showToast('Gagal memuat pesanan: ' + err.message, 'error');
+    showToast('Gagal menghapus pesanan: ' + err.message, 'error');
   }
+}
+
+// ─── Clear Cart (Silent) ──────────────────────────────────────
+function clearCartSilent() {
+  const productIds = cart.map(c => c.product.id);
+  cart = [];
+  document.getElementById('customerName').value = '';
+  document.getElementById('tableNumber').value  = '';
+  if (document.getElementById('discountInput')) document.getElementById('discountInput').value = '';
+  updateCartUI();
+  productIds.forEach(id => refreshMenuCard(id));
+}
+
+// Re-expose pending badge update
+async function loadPendingBadge() {
+  try {
+    const data = await fetchAPI('/api/transactions/pending');
+    const count = data.length;
+    const badge = document.getElementById('pendingCount');
+    const navBadge = document.getElementById('pendingNavBadge');
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+    if (navBadge) {
+      navBadge.textContent = count;
+      navBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+  } catch (_) {}
 }

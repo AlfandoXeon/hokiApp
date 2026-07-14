@@ -1,77 +1,412 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block title %}Pengaturan{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
 {% endblock %}
 
-{% block breadcrumb_current %}
-  <span class="material-symbols-outlined" style="font-size:14px;opacity:0.5">chevron_right</span>
-  <span class="breadcrumb-active">Pengaturan</span>
-{% endblock %}
+{% block breadcrumb_parent %}Admin{% endblock %}
+{% block breadcrumb_current %}Pengaturan{% endblock %}
 {% block page_title %}Pengaturan Sistem{% endblock %}
 
 {% block content %}
 <div class="page-canvas">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-title">Pengaturan</div>
+      <div class="page-header-sub">Konfigurasi aplikasi, profil warung, dan manajemen pengguna</div>
+    </div>
+  </div>
+
   <div class="settings-layout">
 
-    <!-- ── Left Column ── -->
-    <div class="settings-section">
+    <!-- ── Settings Sidenav ── -->
+    <div class="settings-nav">
+      <div class="settings-nav-group-label">Profil</div>
+      <a class="settings-nav-item active" href="#section-profile" onclick="scrollToSection('section-profile', this)">
+        <span class="material-symbols-outlined icon-sm">store</span> Profil Warung
+      </a>
+      <a class="settings-nav-item" href="#section-media" onclick="scrollToSection('section-media', this)">
+        <span class="material-symbols-outlined icon-sm">image</span> Logo & Media
+      </a>
+      <div class="settings-nav-divider"></div>
 
-      <!-- Card: Profil Warung -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 class="settings-card-title">
-            <span class="material-symbols-outlined">storefront</span>
-            Profil Warung
-          </h3>
+      <div class="settings-nav-group-label">Transaksi</div>
+      <a class="settings-nav-item" href="#section-tax" onclick="scrollToSection('section-tax', this)">
+        <span class="material-symbols-outlined icon-sm">percent</span> Pajak & Diskon
+      </a>
+      <a class="settings-nav-item" href="#section-receipt" onclick="scrollToSection('section-receipt', this)">
+        <span class="material-symbols-outlined icon-sm">receipt</span> Struk & QRIS
+      </a>
+      <a class="settings-nav-item" href="#section-features" onclick="scrollToSection('section-features', this)">
+        <span class="material-symbols-outlined icon-sm">toggle_on</span> Fitur Kasir
+      </a>
+      <div class="settings-nav-divider"></div>
+
+      <div class="settings-nav-group-label">Admin</div>
+      <a class="settings-nav-item" href="#section-users" onclick="scrollToSection('section-users', this)">
+        <span class="material-symbols-outlined icon-sm">manage_accounts</span> Manajemen User
+      </a>
+      <a class="settings-nav-item" href="#section-categories" onclick="scrollToSection('section-categories', this)">
+        <span class="material-symbols-outlined icon-sm">category</span> Kategori Menu
+      </a>
+      <a class="settings-nav-item" href="#section-system" onclick="scrollToSection('section-system', this)">
+        <span class="material-symbols-outlined icon-sm">settings_applications</span> Sistem
+      </a>
+    </div>
+
+    <!-- ── Settings Sections ── -->
+    <div class="settings-sections" id="settingsSections">
+
+      <!-- ═══ PROFIL WARUNG ═══ -->
+      <div class="card settings-section" id="section-profile">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">store</span> Profil Warung
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()">
+            <span class="material-symbols-outlined icon-sm">save</span> Simpan
+          </button>
         </div>
-        <div class="settings-card-body">
-          <form class="settings-form" id="profileForm">
+        <div class="card-body">
+          <div class="grid-2">
             <div class="form-group">
-              <label class="form-label" for="settingNama">Nama Usaha</label>
-              <input class="form-input" type="text" id="settingNama" name="nama_usaha">
+              <label class="form-label">Nama Warung *</label>
+              <input type="text" class="form-input" id="settingNama" maxlength="80">
             </div>
             <div class="form-group">
-              <label class="form-label" for="settingAlamat">Alamat Lengkap</label>
-              <textarea class="form-textarea" id="settingAlamat" name="alamat" rows="3"></textarea>
-            </div>
-            <div class="grid-2">
-              <div class="form-group">
-                <label class="form-label" for="settingTelepon">Nomor Telepon</label>
-                <input class="form-input" type="tel" id="settingTelepon" name="telepon">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="settingEmail">Email Kontak</label>
-                <input class="form-input" type="email" id="settingEmail" name="email">
+              <label class="form-label">Nomor Telepon</label>
+              <div class="input-group">
+                <span class="material-symbols-outlined input-prefix">phone</span>
+                <input type="text" class="form-input has-prefix" id="settingTelepon">
               </div>
             </div>
-            <div class="flex justify-end">
-              <button type="button" class="btn btn-primary" onclick="saveProfile()">
-                <span class="material-symbols-outlined icon-sm">save</span>
-                Simpan Profil
-              </button>
+            <div class="form-group col-span-2">
+              <label class="form-label">Alamat</label>
+              <textarea class="form-textarea" id="settingAlamat" rows="2" maxlength="200"></textarea>
             </div>
-          </form>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <div class="input-group">
+                <span class="material-symbols-outlined input-prefix">email</span>
+                <input type="email" class="form-input has-prefix" id="settingEmail">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instagram</label>
+              <div class="input-group">
+                <span class="input-prefix" style="font-weight:800;font-size:14px;left:12px">@</span>
+                <input type="text" class="form-input has-prefix" id="settingInstagram" placeholder="namawarung">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Card: Manajemen User -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 class="settings-card-title">
-            <span class="material-symbols-outlined">group</span>
-            Manajemen User
-          </h3>
-          <button class="btn btn-outlined btn-sm" onclick="openUserModal()">
-            <span class="material-symbols-outlined icon-sm">add</span>
-            Tambah User
+      <!-- ═══ LOGO & MEDIA (ADMIN ONLY) ═══ -->
+      <div class="card settings-section" id="section-media">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">image</span> Logo & Media
+          </div>
+          <span class="badge badge-info">
+            <span class="material-symbols-outlined icon-xs">lock</span> Admin Only
+          </span>
+        </div>
+        <div class="card-body">
+          <p class="text-muted text-sm mb-md">Gambar disimpan langsung di database. Digunakan di sidebar, struk cetak, dan tampilan QRIS.</p>
+          <div class="media-grid">
+
+            <!-- Logo -->
+            <div class="media-card">
+              <div class="media-preview" id="logoPreview">
+                <img id="logoPreviewImg" src="" alt="Logo">
+                <div class="media-placeholder">
+                  <span class="material-symbols-outlined">image</span>
+                  <p>Logo Aplikasi</p>
+                </div>
+              </div>
+              <div class="media-card-footer">
+                <div>
+                  <div class="media-label">Logo Aplikasi</div>
+                  <div class="text-xs text-muted">400×400 px</div>
+                </div>
+                <div class="media-actions">
+                  <label class="btn btn-outlined btn-sm" title="Upload logo" style="cursor:pointer">
+                    <span class="material-symbols-outlined icon-sm">upload</span>
+                    <input type="file" accept="image/*" style="display:none" onchange="uploadMedia('logo_data', this)">
+                  </label>
+                  <button class="btn btn-danger btn-sm btn-icon-only" title="Hapus logo" onclick="deleteMedia('logo_data')">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Banner -->
+            <div class="media-card">
+              <div class="media-preview" id="bannerPreview">
+                <img id="bannerPreviewImg" src="" alt="Banner">
+                <div class="media-placeholder">
+                  <span class="material-symbols-outlined">panorama</span>
+                  <p>Banner Aplikasi</p>
+                </div>
+              </div>
+              <div class="media-card-footer">
+                <div>
+                  <div class="media-label">Banner</div>
+                  <div class="text-xs text-muted">1200×400 px</div>
+                </div>
+                <div class="media-actions">
+                  <label class="btn btn-outlined btn-sm" title="Upload banner" style="cursor:pointer">
+                    <span class="material-symbols-outlined icon-sm">upload</span>
+                    <input type="file" accept="image/*" style="display:none" onchange="uploadMedia('banner_data', this)">
+                  </label>
+                  <button class="btn btn-danger btn-sm btn-icon-only" title="Hapus banner" onclick="deleteMedia('banner_data')">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- QRIS -->
+            <div class="media-card">
+              <div class="media-preview" id="qrisPreview">
+                <img id="qrisPreviewImg" src="" alt="QRIS">
+                <div class="media-placeholder">
+                  <span class="material-symbols-outlined">qr_code_2</span>
+                  <p>QR Code Pembayaran</p>
+                </div>
+              </div>
+              <div class="media-card-footer">
+                <div>
+                  <div class="media-label">QRIS</div>
+                  <div class="text-xs text-muted">600×600 px</div>
+                </div>
+                <div class="media-actions">
+                  <label class="btn btn-outlined btn-sm" title="Upload QRIS" style="cursor:pointer">
+                    <span class="material-symbols-outlined icon-sm">upload</span>
+                    <input type="file" accept="image/*" style="display:none" onchange="uploadMedia('qris_data', this)">
+                  </label>
+                  <button class="btn btn-danger btn-sm btn-icon-only" title="Hapus QRIS" onclick="deleteMedia('qris_data')">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PAJAK & DISKON ═══ -->
+      <div class="card settings-section" id="section-tax">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">percent</span> Pajak & Diskon
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveTaxSettings()">
+            <span class="material-symbols-outlined icon-sm">save</span> Simpan
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>Aktifkan Pajak (PPN)</h4>
+                  <p>Tambahkan pajak pada setiap transaksi</p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="taxEnabled" onchange="updateTaxPreview()">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="form-group mt-md">
+                <label class="form-label">Tarif Pajak (%)</label>
+                <div class="input-group">
+                  <input type="number" class="form-input has-suffix" id="taxRate"
+                    min="0" max="100" step="0.5" oninput="updateTaxPreview()">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+              <div class="toggle-row mt-sm">
+                <div class="toggle-info">
+                  <h4>Aktifkan Fitur Diskon</h4>
+                  <p>Tampilkan opsi diskon di kasir</p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="discountEnabled">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label mb-sm">Preview Kalkulasi</label>
+              <div class="tax-preview" id="taxPreview">
+                <div class="tax-preview-row"><span>Subtotal (contoh)</span><span>Rp 50.000</span></div>
+                <div class="tax-preview-row" id="taxPreviewRow"><span>Pajak (10%)</span><span>Rp 5.000</span></div>
+                <div class="tax-preview-row total-row"><span>TOTAL</span><span id="taxPreviewTotal">Rp 55.000</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ STRUK & QRIS ═══ -->
+      <div class="card settings-section" id="section-receipt">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">receipt</span> Struk & Pembayaran
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveReceiptSettings()">
+            <span class="material-symbols-outlined icon-sm">save</span> Simpan
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="grid-2">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Teks Footer Struk</label>
+                <textarea class="form-textarea" id="settingReceiptFooter" rows="2"
+                  placeholder="Terima kasih! Follow IG kami..."></textarea>
+                <div class="form-hint">Muncul di bagian bawah struk cetak</div>
+              </div>
+              
+              <!-- Bank details -->
+              <div class="grid-2" style="gap:12px; margin-top:12px">
+                <div class="form-group">
+                  <label class="form-label">Nama Bank / e-Wallet</label>
+                  <input type="text" class="form-input" id="settingBankName" placeholder="BCA / OVO / GoPay">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nomor Rekening / ID</label>
+                  <input type="text" class="form-input" id="settingBankAccount">
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:12px">
+                <label class="form-label">Nama Pemilik Rekening</label>
+                <input type="text" class="form-input" id="settingBankHolder">
+              </div>
+
+              <div class="toggle-row" style="margin-top:16px">
+                <div class="toggle-info">
+                  <h4>Tampilkan Logo di Struk</h4>
+                  <p>Membutuhkan logo yang sudah diupload</p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="receiptLogoEnabled">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <h4>Cetak Struk Otomatis</h4>
+                  <p>Dialog cetak terbuka setelah pembayaran</p>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="autoPrintReceipt">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Receipt Live Preview Column -->
+            <div class="receipt-preview-container">
+              <label class="form-label mb-sm">Live Preview Struk Belanja</label>
+              <div class="receipt-preview-paper">
+                <div class="receipt-preview-box" id="receiptPreview">
+                  <div class="rp-header">
+                    <!-- Logo in receipt if enabled -->
+                    <img id="rpLogo" class="rp-logo" src="" alt="Logo" style="display:none">
+                    <h4 id="rpUsahaName">Warung Penyetan Hoki</h4>
+                    <p id="rpUsahaAlamat">Jl. Raya No. 1, Surabaya, Jawa Timur</p>
+                    <p id="rpUsahaTelepon">0812-3456-7890</p>
+                  </div>
+                  <div class="rp-divider"></div>
+                  <div class="rp-row"><span>1x Paket Ayam Lalapan</span><span>Rp 22.000</span></div>
+                  <div class="rp-row"><span>1x Es Teh Manis Jumbo</span><span>Rp 6.000</span></div>
+                  <div class="rp-divider"></div>
+                  <div class="rp-row"><span>Subtotal</span><span>Rp 28.000</span></div>
+                  <div class="rp-row" id="rpTaxRow"><span>Pajak (10%)</span><span>Rp 2.800</span></div>
+                  <div class="rp-row" style="font-weight:700"><span>TOTAL</span><span id="rpTotalVal">Rp 30.800</span></div>
+                  <div class="rp-divider"></div>
+                  <div class="rp-center" id="rpFooterText" style="white-space:pre-line">
+                    Terima kasih atas kunjungan Anda!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ FITUR KASIR ═══ -->
+      <div class="card settings-section" id="section-features">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">toggle_on</span> Fitur Kasir
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveFeatureSettings()">
+            <span class="material-symbols-outlined icon-sm">save</span> Simpan
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="feature-toggles">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Nama Pelanggan</h4>
+                <p>Tampilkan field nama pelanggan di kasir</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="customerNameEnabled"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="toggle-divider"></div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Nomor Meja</h4>
+                <p>Tampilkan field nomor meja di kasir</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tableNumberEnabled"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="toggle-divider"></div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Notifikasi Stok Menipis</h4>
+                <p>Pop-up peringatan saat stok kritis</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="lowStockNotification"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+            <div class="toggle-divider"></div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Split Bill</h4>
+                <p>Izinkan pembagian tagihan antar pelanggan</p>
+              </div>
+              <label class="toggle"><input type="checkbox" id="splitBillEnabled"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ MANAJEMEN USER ═══ -->
+      <div class="card settings-section" id="section-users">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">manage_accounts</span> Manajemen User
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openUserModal()">
+            <span class="material-symbols-outlined icon-sm">person_add</span> Tambah User
           </button>
         </div>
         <div class="table-wrapper">
-          <table id="usersTable">
+          <table>
             <thead>
               <tr>
-                <th>Nama</th>
+                <th>User</th>
                 <th>Username</th>
                 <th>Role</th>
                 <th>Status</th>
@@ -79,165 +414,162 @@
               </tr>
             </thead>
             <tbody id="usersTableBody">
-              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--on-surface-variant)">
-                <div class="spinner" style="margin:0 auto 10px"></div>Memuat...
-              </td></tr>
+              <tr><td colspan="5"><div class="empty-state" style="padding:30px"><div class="spinner"></div></div></td></tr>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
 
-    <!-- ── Right Column ── -->
-    <div class="settings-section">
-
-      <!-- Card: Pajak -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 class="settings-card-title">
-            <span class="material-symbols-outlined">percent</span>
-            Pengaturan Pajak
-          </h3>
+      <!-- ═══ KATEGORI MENU ═══ -->
+      <div class="card settings-section" id="section-categories">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">category</span> Kategori Menu
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openCategoryModal()">
+            <span class="material-symbols-outlined icon-sm">add</span> Tambah
+          </button>
         </div>
-        <div class="settings-card-body">
-          <div class="tax-row">
-            <span class="tax-row-label">Aktifkan Pajak</span>
-            <label class="toggle">
-              <input type="checkbox" id="taxEnabled" onchange="saveTaxSettings()">
-              <div class="toggle-track"></div>
-            </label>
-          </div>
-          <div class="tax-row">
-            <span class="tax-row-label">Persentase Pajak (%)</span>
-            <input class="tax-rate-input" type="number" id="taxRate" value="10" min="0" max="100" onchange="saveTaxSettings()">
-          </div>
-          <div class="settings-note">
-            <span class="material-symbols-outlined">info</span>
-            <span>Pajak akan ditampilkan di struk dan dihitung otomatis saat kasir checkout.</span>
+        <div class="card-body">
+          <div class="cat-grid" id="categoryGrid">
+            <div class="empty-state" style="padding:20px"><div class="spinner"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Card: Struk & Printer -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 class="settings-card-title">
-            <span class="material-symbols-outlined">print</span>
-            Pengaturan Struk
-          </h3>
-        </div>
-        <div class="settings-card-body">
-          <div class="form-group">
-            <label class="form-label" for="receiptFooter">Teks Footer Struk</label>
-            <textarea class="form-textarea" id="receiptFooter" rows="3"
-              placeholder="Contoh: Terima kasih atas kunjungan Anda!"></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="bankName">Nama Bank (Transfer)</label>
-            <input class="form-input" type="text" id="bankName" placeholder="BCA / BRI / Mandiri">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="bankAccount">Nomor Rekening</label>
-            <input class="form-input" type="text" id="bankAccount" placeholder="1234567890">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="bankHolder">Atas Nama</label>
-            <input class="form-input" type="text" id="bankHolder" placeholder="Nama Pemilik">
-          </div>
-          <div class="flex justify-end">
-            <button class="btn btn-primary" onclick="saveReceiptSettings()">
-              <span class="material-symbols-outlined icon-sm">save</span>
-              Simpan
-            </button>
+      <!-- ═══ SISTEM ═══ -->
+      <div class="card settings-section" id="section-system">
+        <div class="settings-card-header-action">
+          <div class="settings-card-title">
+            <span class="material-symbols-outlined">settings_applications</span> Sistem
           </div>
         </div>
-      </div>
-
-      <!-- Card: Backup & Restore -->
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <h3 class="settings-card-title">
-            <span class="material-symbols-outlined">database</span>
-            Backup & Restore
-          </h3>
-        </div>
-        <div class="settings-card-body">
-          <p class="body-md text-muted mb-md">
-            Pastikan data transaksi dan stok Anda aman dengan melakukan backup secara berkala.
-          </p>
-          <div class="backup-status" id="backupStatus">
-            <span class="material-symbols-outlined">check_circle</span>
-            <div class="backup-status-text">
-              <div class="backup-status-label">Backup Terakhir</div>
-              <div class="backup-status-time" id="backupLastTime">Belum pernah</div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="system-action-card">
+            <div class="system-action-info">
+              <h4>Backup Database</h4>
+              <p>Download salinan database SQLite lengkap</p>
             </div>
-          </div>
-          <div class="flex flex-col gap-sm">
-            <a href="/api/backup" class="btn btn-primary btn-block" id="btnBackup">
-              <span class="material-symbols-outlined icon-sm">cloud_download</span>
-              Backup Data Sekarang
+            <a href="/api/backup" class="btn btn-outlined" target="_blank">
+              <span class="material-symbols-outlined icon-sm">download</span> Download
             </a>
-            <div class="settings-note">
-              <span class="material-symbols-outlined">info</span>
-              <span>File backup akan diunduh sebagai file <code>.db</code> yang bisa disimpan di komputer Anda.</span>
+          </div>
+          <div class="system-action-card">
+            <div class="system-action-info">
+              <h4>Export Laporan Excel</h4>
+              <p>Buka halaman laporan untuk export Excel</p>
             </div>
+            <a href="/laporan" class="btn btn-outlined">
+              <span class="material-symbols-outlined icon-sm">analytics</span> Buka Laporan
+            </a>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- end settings-sections -->
+  </div><!-- end settings-layout -->
 </div>
 
-<!-- ── Modal: Add/Edit User ── -->
-<div class="modal-overlay" id="userModal">
-  <div class="modal user-modal">
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- User Modal -->
+<div class="modal-overlay" id="userModal" aria-hidden="true">
+  <div class="modal" style="max-width:500px">
     <div class="modal-header">
-      <h3 class="modal-title" id="userModalTitle">Tambah User Baru</h3>
-      <button class="icon-btn" onclick="closeModal('userModal')">
+      <div class="modal-title" id="userModalTitle">Tambah User</div>
+      <button class="btn btn-ghost btn-sm btn-icon-only" onclick="closeModal('userModal')">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="editUserId">
-      <div class="form-group">
-        <label class="form-label" for="userNama">Nama Lengkap</label>
-        <input class="form-input" type="text" id="userNama" placeholder="Nama Lengkap">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="userUsername">Username *</label>
-        <input class="form-input" type="text" id="userUsername" placeholder="username">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="userPassword">Password <span id="pwRequired">*</span></label>
-        <input class="form-input" type="password" id="userPassword" placeholder="Min. 6 karakter">
-        <p class="label-sm text-muted mt-sm" id="pwHint" style="display:none">Kosongkan jika tidak ingin mengubah password</p>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="userRole">Role</label>
-        <select class="form-select" id="userRole">
-          <option value="kasir">Kasir</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="toggle-wrapper">
-          <label class="toggle">
-            <input type="checkbox" id="userActive" checked>
-            <div class="toggle-track"></div>
-          </label>
-          <span style="font-size:14px">Akun aktif</span>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap</label>
+          <input type="text" class="form-input" id="userNama" placeholder="Contoh: Budi Santoso">
         </div>
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input type="text" class="form-input" id="userUsername" placeholder="username" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password <span id="pwRequired">*</span></label>
+          <input type="password" class="form-input" id="userPassword" autocomplete="new-password">
+          <div class="form-hint" id="pwHint" style="display:none">Kosongkan jika tidak ingin mengubah password</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="userRole">
+            <option value="kasir">Kasir</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group col-span-2">
+          <label class="form-label">Warna Avatar</label>
+          <div class="color-swatches" id="colorSwatches">
+            {% for color in ['#1b6d24', '#0277BD', '#6A1B9A', '#C62828', '#E65100', '#00695C', '#F57F17', '#37474F', '#AD1457'] %}
+            <div class="color-swatch" style="background:{{ color }}" data-color="{{ color }}" onclick="selectAvatarColor('{{ color }}', this)"></div>
+            {% endfor %}
+          </div>
+          <input type="hidden" id="userAvatarColor" value="#1b6d24">
+        </div>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info"><h4>Status Aktif</h4><p>User dapat login ke sistem</p></div>
+        <label class="toggle">
+          <input type="checkbox" id="userActive" checked>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outlined" onclick="closeModal('userModal')">Batal</button>
-      <button class="btn btn-primary" onclick="saveUser()">
-        <span class="material-symbols-outlined icon-sm">save</span>
-        Simpan
+      <button class="btn btn-primary" id="btnSaveUser" onclick="saveUser()">
+        <span class="material-symbols-outlined icon-sm">save</span> Simpan
       </button>
     </div>
   </div>
 </div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="categoryModal" aria-hidden="true">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" id="catModalTitle">Tambah Kategori</div>
+      <button class="btn btn-ghost btn-sm btn-icon-only" onclick="closeModal('categoryModal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCatId">
+      <div class="form-group">
+        <label class="form-label">Nama Kategori *</label>
+        <input type="text" class="form-input" id="catName" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon (Material Symbol)</label>
+        <input type="text" class="form-input" id="catIcon" value="category" placeholder="misal: restaurant, local_cafe">
+        <div class="form-hint">Gunakan nama icon dari <a href="https://fonts.google.com/icons" target="_blank" style="color:var(--primary)">Google Material Symbols</a></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi</label>
+        <input type="text" class="form-input" id="catDescription" placeholder="Opsional">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Urutan Tampil</label>
+        <input type="number" class="form-input" id="catSortOrder" value="0" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outlined" onclick="closeModal('categoryModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveCategory()">
+        <span class="material-symbols-outlined icon-sm">save</span> Simpan
+      </button>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}

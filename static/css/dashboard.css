@@ -1,87 +1,145 @@
 /* ============================================================
-   HokiApp — Dashboard Page Styles
+   HokiApp v2.0 — Dashboard Styles
    ============================================================ */
 
-/* KPI Grid */
-.kpi-grid {
+/* ─── Layout ─────────────────────────────────────────────────── */
+.dashboard-content-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--gutter);
-  margin-bottom: var(--stack-lg);
-}
-
-/* Dashboard split layout */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: var(--gutter);
+  grid-template-columns: 1fr 340px;
+  gap: var(--gap);
   align-items: start;
 }
 
-/* Transactions table card */
-.transactions-card { overflow: hidden; }
-.transactions-card tbody tr:hover { background-color: rgba(215,228,236,0.25); }
-
-/* Low stock panel */
-.stock-alerts-list {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: var(--stack-md);
+/* ─── Period Selector ────────────────────────────────────────── */
+.period-bar {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.period-btn {
+  padding: 7px 16px;
+  border-radius: var(--r-full);
+  font-size: 12.5px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid var(--outline-variant);
+  background: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  transition: all var(--tr-fast);
+}
+.period-btn:hover { border-color: var(--primary); color: var(--primary); }
+.period-btn.active {
+  background: var(--primary); color: white; border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(27,109,36,0.3);
 }
 
-/* Period selector dropdown */
-.period-select-wrapper { position: relative; display: inline-flex; align-items: center; }
-.period-select {
-  appearance: none;
-  background-color: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
-  padding: 8px 36px 8px 14px;
-  font-size: 13px; font-weight: 500;
-  color: var(--on-surface);
-  cursor: pointer; outline: none;
-  min-height: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath fill='%2340493d' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  transition: border-color 0.15s;
+/* ─── Quick Actions ──────────────────────────────────────────── */
+.quick-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
 }
-.period-select:focus { border-color: var(--primary); }
-
-/* Status badges in table */
-.badge-pending  { background-color: rgba(0,95,175,0.10); color: var(--secondary); }
-.badge-paid     { background-color: rgba(13,99,27,0.10); color: var(--primary); }
-.badge-cancelled{ background-color: rgba(64,73,61,0.10); color: var(--on-surface-variant); }
-
-/* Date display */
-.date-display {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--on-surface-variant);
-}
-
-/* Restock quick button */
-.btn-restock {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 12px;
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  font-size: 11px; font-weight: 700;
-  color: var(--on-surface);
-  background-color: var(--surface-container-lowest);
-  cursor: pointer;
-  transition: all 0.15s; white-space: nowrap;
+.quick-action-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--outline-variant);
+  border-radius: var(--r-lg);
+  font-size: 13px; font-weight: 600; color: var(--on-surface);
+  cursor: pointer; transition: all var(--tr-fast);
   text-decoration: none;
 }
-.btn-restock:hover { background-color: var(--surface-container-high); border-color: var(--outline); }
+.quick-action-btn:hover {
+  border-color: var(--primary); color: var(--primary);
+  background: rgba(27,109,36,0.04);
+  transform: translateY(-1px); box-shadow: var(--shadow-sm);
+}
+.quick-action-btn .material-symbols-outlined { font-size: 18px; }
 
-/* No data state */
-.no-data-row td {
-  text-align: center; padding: 48px;
-  color: var(--on-surface-variant); font-style: italic;
+/* ─── Chart ──────────────────────────────────────────────────── */
+.chart-container {
+  position: relative;
+  min-height: 220px;
+  padding: 4px 0;
 }
 
-/* Items summary truncate */
+/* ─── Transaction Table ───────────────────────────────────────── */
+.transaction-table-wrap { overflow-x: auto; }
 .items-summary-cell {
-  max-width: 200px;
+  display: block; max-width: 200px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--on-surface-variant); font-size: 12.5px;
+}
+
+.no-data-row td {
+  padding: 40px;
+  text-align: center;
   color: var(--on-surface-variant);
+}
+
+/* ─── Stock Alert Card ───────────────────────────────────────── */
+.stock-alerts-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.alert-item-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-restock {
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 10px;
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--r-sm);
+  font-size: 11px; font-weight: 700; color: var(--on-surface-variant);
+  cursor: pointer; transition: all var(--tr-fast); text-decoration: none;
+}
+.btn-restock:hover {
+  background: var(--primary); color: white; border-color: var(--primary);
+}
+.btn-restock .material-symbols-outlined { font-size: 14px; }
+
+/* ─── Revenue Summary Box ────────────────────────────────────── */
+.revenue-box {
+  background: linear-gradient(135deg, var(--brand-800) 0%, var(--brand-900) 100%);
+  border-radius: var(--r-lg);
+  padding: var(--pad-lg);
+  color: white;
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--gap);
+}
+.revenue-box-label  { font-size: 12px; opacity: 0.75; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.revenue-box-value  { font-size: 36px; font-weight: 800; letter-spacing: -0.03em; margin-top: 4px; }
+.revenue-box-growth { font-size: 13px; opacity: 0.85; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+/* ─── Top Products Mini ──────────────────────────────────────── */
+.top-product-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--outline-variant);
+}
+.top-product-row:last-child { border-bottom: none; }
+.top-product-rank {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surface-container);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--on-surface-variant);
+  flex-shrink: 0;
+}
+.top-product-rank.gold   { background: #FFD700; color: #5d4037; }
+.top-product-rank.silver { background: #C0C0C0; color: #424242; }
+.top-product-rank.bronze { background: #CD7F32; color: white; }
+.top-product-name { flex: 1; font-size: 13px; font-weight: 600; }
+.top-product-qty  { font-size: 12px; color: var(--on-surface-variant); font-family: var(--font-mono); }
+
+/* ─── Activity Feed ──────────────────────────────────────────── */
+.activity-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--outline-variant);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 6px; flex-shrink: 0;
+}
+.activity-dot.paid   { background: var(--success); }
+.activity-dot.cancel { background: var(--error); }
+.activity-dot.pending{ background: var(--warning); }
+
+/* ─── Animated Counter ───────────────────────────────────────── */
+.kpi-value[data-target] {
+  animation: countUp 0.5s ease forwards;
 }

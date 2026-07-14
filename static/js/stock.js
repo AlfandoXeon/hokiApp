@@ -1,375 +1,380 @@
 /* ============================================================
-   HokiApp — Stock Management Logic (stock.js)
+   HokiApp v2.0 — Stock Logic (stock.js)
    ============================================================ */
-
 'use strict';
 
-// ─── State ────────────────────────────────────────────────────
 let allProducts   = [];
 let allCategories = [];
-let deleteTarget  = null;
-let restockTarget = null;
-let editMode      = false;
 
 // ─── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([loadCategories(), loadProducts()]);
-  setupFilters();
+  
+  // Search listener
+  const searchEl = document.getElementById('productSearch');
+  if (searchEl) {
+    searchEl.addEventListener('input', debounce((e) => {
+      applyLocalFilters();
+    }, 200));
+  }
 });
 
-// ─── Load Categories ─────────────────────────────────────────
+// ─── Load Categories ──────────────────────────────────────────
 async function loadCategories() {
   try {
     allCategories = await fetchAPI('/api/categories');
-
-    // Populate filter dropdown
-    const filterSelect = document.getElementById('stockCategoryFilter');
-    if (filterSelect) {
-      allCategories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.id;
-        opt.textContent = cat.name;
-        filterSelect.appendChild(opt);
-      });
+    
+    // Populate filter
+    const filterCat = document.getElementById('filterCategory');
+    if (filterCat) {
+      filterCat.innerHTML = '<option value="all">Semua Kategori</option>' + 
+        allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     }
-
-    // Populate modal select
-    const modalSelect = document.getElementById('productCategory');
-    if (modalSelect) {
-      allCategories.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.id;
-        opt.textContent = cat.name;
-        modalSelect.appendChild(opt);
-      });
+    
+    // Populate form select
+    const formCat = document.getElementById('prodCategory');
+    if (formCat) {
+      formCat.innerHTML = '<option value="">Pilih Kategori</option>' + 
+        allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     }
   } catch (err) {
-    showToast('Gagal memuat kategori: ' + err.message, 'error');
+    console.warn('Gagal memuat kategori:', err.message);
   }
 }
 
 // ─── Load Products ────────────────────────────────────────────
 async function loadProducts() {
+  const tbody = document.getElementById('productsTbody');
+  if (!tbody) return;
+  
+  const catId = document.getElementById('filterCategory')?.value || 'all';
+  tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" style="padding:40px"><div class="spinner"></div><p>Memuat...</p></div></td></tr>`;
+  
   try {
-    allProducts = await fetchAPI('/api/products');
-    renderTable();
+    const url = catId === 'all' ? '/api/products' : `/api/products?category_id=${catId}`;
+    allProducts = await fetchAPI(url);
+    applyLocalFilters();
+    updateStats(allProducts);
   } catch (err) {
-    document.getElementById('stockTableBody').innerHTML = `
-      <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--error)">
-        Gagal memuat: ${err.message}
-      </td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" style="color:var(--error);padding:40px">${err.message}</div></td></tr>`;
   }
 }
 
-// ─── Render Table ─────────────────────────────────────────────
-function renderTable() {
-  const search     = document.getElementById('stockSearch')?.value.toLowerCase() || '';
-  const catFilter  = document.getElementById('stockCategoryFilter')?.value || 'all';
-  const statFilter = document.getElementById('stockStatusFilter')?.value || 'all';
-
+// ─── Filters & Render ─────────────────────────────────────────
+function applyLocalFilters() {
+  const query = document.getElementById('productSearch')?.value.toLowerCase() || '';
+  const stockFilter = document.getElementById('filterStock')?.value || 'all';
+  
   let filtered = allProducts;
-  if (search)                    filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
-  if (catFilter !== 'all')       filtered = filtered.filter(p => p.category_id == catFilter);
-  if (statFilter !== 'all')      filtered = filtered.filter(p => getStockStatus(p) === statFilter);
+  
+  // Search
+  if (query) {
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(query) || (p.category_name||'').toLowerCase().includes(query));
+  }
+  
+  // Stock condition
+  if (stockFilter === 'low') {
+    filtered = filtered.filter(p => p.stock_qty !== null && p.stock_qty <= (p.low_stock_threshold || 5));
+  } else if (stockFilter === 'available') {
+    filtered = filtered.filter(p => p.stock_qty === null || p.stock_qty > (p.low_stock_threshold || 5));
+  }
+  
+  renderTable(filtered);
+}
 
-  const tbody = document.getElementById('stockTableBody');
-  const countEl = document.getElementById('productCount');
-  if (countEl) countEl.textContent = `${filtered.length} produk`;
+function updateStats(products) {
+  document.getElementById('statTotal').textContent = products.length;
+  
+  let low = 0, empty = 0;
+  products.forEach(p => {
+    if (p.stock_qty !== null) {
+      if (p.stock_qty <= 0) empty++;
+      else if (p.stock_qty <= (p.low_stock_threshold || 5)) low++;
+    }
+  });
+  
+  document.getElementById('statLow').textContent   = low;
+  document.getElementById('statEmpty').textContent = empty;
+}
 
-  if (filtered.length === 0) {
-    tbody.innerHTML = `
-      <tr><td colspan="7">
-        <div class="empty-state">
-          <span class="material-symbols-outlined">search_off</span>
-          <p>Tidak ada produk yang sesuai filter</p>
-        </div>
-      </td></tr>`;
+function renderTable(products) {
+  const tbody = document.getElementById('productsTbody');
+  if (!tbody) return;
+  
+  if (products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" style="padding:40px"><p>Tidak ada produk ditemukan</p></div></td></tr>`;
     return;
   }
-
-  tbody.innerHTML = filtered.map((p, i) => {
-    const status      = getStockStatus(p);
-    const statusBadge = getStatusBadge(status, p);
-    const stockBar    = getStockBar(p, status);
-    const imgHtml     = p.image_path
-      ? `<img src="${p.image_path}" alt="${p.name}">`
-      : `<span class="material-symbols-outlined">restaurant</span>`;
-
-    return `
-      <tr>
-        <td class="td-muted">${i + 1}</td>
-        <td>
-          <div class="product-name-cell">
-            <div class="product-thumb">${imgHtml}</div>
-            <div>
-              <div class="product-name-text">${p.name}</div>
-              <div class="product-category-text">${p.category_name || 'Tanpa kategori'}</div>
-            </div>
-          </div>
-        </td>
-        <td class="td-bold">${formatRupiah(p.price)}</td>
-        <td>
-          <div class="stock-level-cell">
-            <div class="stock-qty ${status === 'empty' ? 'text-error' : status === 'low' ? '' : ''}">${p.stock_qty}</div>
-            <div class="stock-unit-text">${p.stock_unit}</div>
-            ${stockBar}
-          </div>
-        </td>
-        <td>${statusBadge}</td>
-        <td>
-          <div style="display:flex;align-items:center;justify-content:center">
-            <label class="toggle" title="${p.is_available ? 'Tersedia' : 'Tidak tersedia'}">
-              <input type="checkbox" ${p.is_available ? 'checked' : ''} onchange="toggleAvailability(${p.id}, this.checked)">
-              <div class="toggle-track"></div>
-            </label>
-          </div>
-        </td>
-        <td>
-          <div class="table-actions">
-            <button class="action-btn" title="Restock" onclick="openRestockModal(${p.id})">
-              <span class="material-symbols-outlined">add_circle</span>
-            </button>
-            <button class="action-btn edit" title="Edit" onclick="openProductModal(${p.id})">
-              <span class="material-symbols-outlined">edit</span>
-            </button>
-            <button class="action-btn delete" title="Hapus" onclick="openDeleteModal(${p.id})">
-              <span class="material-symbols-outlined">delete</span>
-            </button>
-          </div>
-        </td>
-      </tr>`;
+  
+  // We assume admin role is present if the adjust modal is in DOM.
+  const isAdmin = !!document.getElementById('adjustModal');
+  
+  tbody.innerHTML = products.map(p => {
+    let stockLabel = '';
+    let stockBadge = '';
+    
+    if (p.stock_qty !== null) {
+      const q = p.stock_qty;
+      const t = p.low_stock_threshold || 5;
+      
+      let badgeCls = 'safe';
+      if (q <= 0) badgeCls = 'danger';
+      else if (q <= t) badgeCls = 'warning';
+      
+      stockBadge = `<span class="stock-badge ${badgeCls}">${q} ${p.stock_unit || ''}</span>`;
+      stockLabel = q <= 0 ? 'Habis' : (q <= t ? 'Menipis' : 'Aman');
+    } else {
+      stockBadge = `<span class="stock-badge safe" style="background:transparent;border:1px solid var(--outline);color:var(--on-surface)">Unlimited</span>`;
+      stockLabel = 'Unlimited';
+    }
+    
+    const isAvail = p.is_available === 1;
+    const catName = p.category_name || 'Tanpa Kategori';
+    const hasImg  = p.has_image;
+    
+    return `<tr>
+      <td>
+        <div class="product-thumb-cell" ${hasImg ? `style="background-image:url('/api/products/${p.id}/image')"` : ''}>
+          ${!hasImg ? `<span class="material-symbols-outlined" style="opacity:0.3;font-size:20px">restaurant</span>` : ''}
+        </div>
+      </td>
+      <td>
+        <div style="font-weight:700">${p.name}</div>
+        <div class="text-xs text-muted" style="margin-top:4px"><span class="material-symbols-outlined icon-xs">category</span> ${catName}</div>
+      </td>
+      <td class="money" style="color:var(--primary);font-weight:700">${formatRupiah(p.price)}</td>
+      <td class="stock-col-hide money" style="color:var(--on-surface-variant)">${formatRupiah(p.hpp || 0)}</td>
+      <td>
+        <div>${stockBadge}</div>
+        ${p.stock_qty !== null ? `<div style="font-size:10px;margin-top:4px;color:var(--on-surface-variant)">Batas min: ${p.low_stock_threshold || 5}</div>` : ''}
+      </td>
+      <td class="stock-col-hide">
+        <span class="badge ${isAvail ? 'badge-success' : 'badge-neutral'}">${isAvail ? 'Aktif' : 'Nonaktif'}</span>
+        ${p.is_featured ? '<span class="badge badge-info" style="margin-left:4px">Promo</span>' : ''}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end">
+          <button class="action-btn restock" title="Restock" onclick="openRestockModal(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.stock_qty})">
+            <span class="material-symbols-outlined">add_circle</span>
+          </button>
+          ${isAdmin ? `
+          <button class="action-btn" style="background:var(--warning-light);color:var(--warning)" title="Adjust Stok (Admin)" onclick="openAdjustModal(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.stock_qty})">
+            <span class="material-symbols-outlined">tune</span>
+          </button>
+          ` : ''}
+          <button class="action-btn edit" title="Edit Produk" onclick="openProductModal(${p.id})">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+          ${isAdmin ? `
+          <button class="action-btn delete" title="Hapus" onclick="deleteProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}')">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+          ` : ''}
+        </div>
+      </td>
+    </tr>`;
   }).join('');
 }
 
-function getStockStatus(p) {
-  if (p.stock_qty <= 0) return 'empty';
-  if (p.stock_qty <= p.low_stock_threshold / 2) return 'critical';
-  if (p.stock_qty <= p.low_stock_threshold) return 'low';
-  return 'safe';
-}
-
-function getStatusBadge(status, p) {
-  const map = {
-    safe:     '<span class="badge badge-success">Aman</span>',
-    low:      '<span class="badge badge-warning">Menipis</span>',
-    critical: '<span class="badge badge-danger">Kritis</span>',
-    empty:    '<span class="badge badge-neutral">Habis</span>',
-  };
-  return map[status] || map.safe;
-}
-
-function getStockBar(p, status) {
-  if (p.stock_qty <= 0) {
-    return `<div class="stock-bar-wrapper"><div class="stock-bar empty" style="width:0%"></div></div>`;
+// ─── Image Preview ────────────────────────────────────────────
+function previewImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('imgPreview').src = e.target.result;
+      document.getElementById('imgZone').classList.add('has-image');
+      document.getElementById('removeImageFlag').value = '0';
+    }
+    reader.readAsDataURL(file);
   }
-  const maxVisual = Math.max(p.stock_qty, p.low_stock_threshold * 2);
-  const pct = Math.min(100, (p.stock_qty / maxVisual) * 100);
-  return `<div class="stock-bar-wrapper"><div class="stock-bar ${status}" style="width:${pct}%"></div></div>`;
 }
 
-// ─── Filters Setup ────────────────────────────────────────────
-function setupFilters() {
-  const search  = document.getElementById('stockSearch');
-  const catSel  = document.getElementById('stockCategoryFilter');
-  const statSel = document.getElementById('stockStatusFilter');
-
-  if (search)  search.addEventListener('input',  debounce(renderTable, 200));
-  if (catSel)  catSel.addEventListener('change', renderTable);
-  if (statSel) statSel.addEventListener('change', renderTable);
-}
-
-// ─── Toggle Availability ──────────────────────────────────────
-async function toggleAvailability(productId, isAvailable) {
-  try {
-    await fetchAPI(`/api/products/${productId}`, {
-      method: 'PUT',
-      body: { is_available: isAvailable ? 1 : 0 }
-    });
-    const p = allProducts.find(x => x.id === productId);
-    if (p) p.is_available = isAvailable ? 1 : 0;
-    showToast(`${isAvailable ? 'Produk diaktifkan' : 'Produk dinonaktifkan'}.`, 'info');
-  } catch (err) {
-    showToast('Gagal: ' + err.message, 'error');
-    renderTable(); // Revert UI
-  }
+function removeImagePreview(e) {
+  e.stopPropagation();
+  document.getElementById('imgPreview').src = '';
+  document.getElementById('imgZone').classList.remove('has-image');
+  document.getElementById('prodImage').value = '';
+  document.getElementById('removeImageFlag').value = '1';
 }
 
 // ─── Product Modal ────────────────────────────────────────────
-function openProductModal(productId = null) {
-  editMode = !!productId;
-  document.getElementById('productModalTitle').textContent = editMode ? 'Edit Produk' : 'Tambah Produk Baru';
-  document.getElementById('editProductId').value = productId || '';
-
+async function openProductModal(prodId = null) {
+  const isEdit = !!prodId;
+  document.getElementById('productModalTitle').textContent = isEdit ? 'Edit Produk' : 'Tambah Produk Baru';
+  document.getElementById('editProdId').value = prodId || '';
+  
   // Reset form
-  document.getElementById('productName').value      = '';
-  document.getElementById('productCategory').value  = '';
-  document.getElementById('productPrice').value     = '';
-  document.getElementById('productStock').value     = '0';
-  document.getElementById('productUnit').value      = 'porsi';
-  document.getElementById('productThreshold').value = '5';
-  document.getElementById('productAvailable').checked = true;
-  removeImage();
-
-  if (editMode) {
-    const p = allProducts.find(x => x.id === productId);
+  document.getElementById('productForm').reset();
+  removeImagePreview({stopPropagation: ()=>{}});
+  document.getElementById('removeImageFlag').value = '0';
+  document.getElementById('stockEditHint').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('prodStock').disabled = isEdit;
+  
+  if (isEdit) {
+    const p = allProducts.find(x => x.id === prodId);
     if (p) {
-      document.getElementById('productName').value      = p.name;
-      document.getElementById('productCategory').value  = p.category_id || '';
-      document.getElementById('productPrice').value     = p.price;
-      document.getElementById('productStock').value     = p.stock_qty;
-      document.getElementById('productUnit').value      = p.stock_unit;
-      document.getElementById('productThreshold').value = p.low_stock_threshold;
-      document.getElementById('productAvailable').checked = !!p.is_available;
-
-      if (p.image_path) {
-        const preview = document.getElementById('imagePreview');
-        const zone    = document.getElementById('imageUploadZone');
-        const btnRemove = document.getElementById('btnRemoveImage');
-        if (preview) { preview.src = p.image_path; preview.style.display = 'block'; }
-        if (zone)    zone.classList.add('has-image');
-        if (btnRemove) btnRemove.style.display = '';
+      document.getElementById('prodName').value      = p.name;
+      document.getElementById('prodCategory').value  = p.category_id || '';
+      document.getElementById('prodPrice').value     = p.price;
+      document.getElementById('prodHpp').value       = p.hpp || 0;
+      document.getElementById('prodDiscount').value  = p.discount_pct || 0;
+      document.getElementById('prodStock').value     = p.stock_qty || 0;
+      document.getElementById('prodThreshold').value = p.low_stock_threshold || 5;
+      document.getElementById('prodUnit').value      = p.stock_unit || 'porsi';
+      document.getElementById('prodAvailable').checked = p.is_available === 1;
+      document.getElementById('prodFeatured').checked  = p.is_featured === 1;
+      
+      if (p.has_image) {
+        document.getElementById('imgPreview').src = `/api/products/${p.id}/image?t=${Date.now()}`;
+        document.getElementById('imgZone').classList.add('has-image');
       }
     }
   }
-
+  
   openModal('productModal');
 }
 
-function previewImage(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const preview  = document.getElementById('imagePreview');
-    const zone     = document.getElementById('imageUploadZone');
-    const btnRemove= document.getElementById('btnRemoveImage');
-    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
-    if (zone)    zone.classList.add('has-image');
-    if (btnRemove) btnRemove.style.display = '';
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeImage() {
-  const preview  = document.getElementById('imagePreview');
-  const zone     = document.getElementById('imageUploadZone');
-  const input    = document.getElementById('productImageInput');
-  const btnRemove= document.getElementById('btnRemoveImage');
-  if (preview)  { preview.src = ''; preview.style.display = 'none'; }
-  if (zone)     zone.classList.remove('has-image');
-  if (input)    input.value = '';
-  if (btnRemove) btnRemove.style.display = 'none';
-}
-
 async function saveProduct() {
-  const name      = document.getElementById('productName').value.trim();
-  const price     = parseFloat(document.getElementById('productPrice').value);
-  const stock     = parseInt(document.getElementById('productStock').value, 10);
-  const threshold = parseInt(document.getElementById('productThreshold').value, 10);
-
-  if (!name) return showToast('Nama produk wajib diisi.', 'warning');
-  if (isNaN(price) || price < 0) return showToast('Harga tidak valid.', 'warning');
-
+  const prodId = document.getElementById('editProdId').value;
+  const isEdit = !!prodId;
+  
   const formData = new FormData();
-  formData.append('name', name);
-  formData.append('category_id', document.getElementById('productCategory').value || '');
-  formData.append('price', price);
-  formData.append('stock_qty', isNaN(stock) ? 0 : stock);
-  formData.append('stock_unit', document.getElementById('productUnit').value);
-  formData.append('low_stock_threshold', isNaN(threshold) ? 5 : threshold);
-  formData.append('is_available', document.getElementById('productAvailable').checked ? '1' : '0');
-
-  const fileInput = document.getElementById('productImageInput');
-  if (fileInput?.files[0]) {
+  formData.append('name', document.getElementById('prodName').value);
+  formData.append('category_id', document.getElementById('prodCategory').value);
+  formData.append('price', document.getElementById('prodPrice').value);
+  formData.append('hpp', document.getElementById('prodHpp').value);
+  formData.append('discount_pct', document.getElementById('prodDiscount').value);
+  if (!isEdit) formData.append('stock_qty', document.getElementById('prodStock').value);
+  formData.append('low_stock_threshold', document.getElementById('prodThreshold').value);
+  formData.append('stock_unit', document.getElementById('prodUnit').value);
+  formData.append('is_available', document.getElementById('prodAvailable').checked ? 1 : 0);
+  formData.append('is_featured', document.getElementById('prodFeatured').checked ? 1 : 0);
+  
+  const fileInput = document.getElementById('prodImage');
+  if (fileInput.files[0]) {
     formData.append('image', fileInput.files[0]);
   }
-
-  const btnSave = document.getElementById('btnSaveProduct');
-  btnSave.disabled = true;
-  btnSave.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px"></div> Menyimpan...';
-
+  
+  if (isEdit && document.getElementById('removeImageFlag').value === '1') {
+    formData.append('remove_image', '1');
+  }
+  
   try {
-    const productId = document.getElementById('editProductId').value;
-    const method = editMode ? 'PUT' : 'POST';
-    const url    = editMode ? `/api/products/${productId}` : '/api/products';
-
-    const updated = await fetchAPI(url, { method, body: formData });
-
-    if (editMode) {
-      const idx = allProducts.findIndex(p => p.id === parseInt(productId));
-      if (idx >= 0) allProducts[idx] = { ...allProducts[idx], ...updated };
+    const btn = document.querySelector('#productModal .btn-primary');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner spinner-sm"></div> Menyimpan...';
+    
+    if (isEdit) {
+      await fetchAPI(`/api/products/${prodId}`, { method: 'PUT', body: formData });
     } else {
-      allProducts.push(updated);
+      await fetchAPI(`/api/products`, { method: 'POST', body: formData });
     }
-
-    renderTable();
+    
+    await loadProducts();
     closeModal('productModal');
-    showToast(editMode ? 'Produk diperbarui.' : 'Produk baru ditambahkan.', 'success');
+    showToast(isEdit ? 'Produk diperbarui!' : 'Produk berhasil ditambahkan!', 'success');
   } catch (err) {
     showToast('Gagal menyimpan: ' + err.message, 'error');
   } finally {
-    btnSave.disabled = false;
-    btnSave.innerHTML = '<span class="material-symbols-outlined icon-sm">save</span> Simpan';
+    const btn = document.querySelector('#productModal .btn-primary');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined icon-sm">save</span> Simpan Produk';
   }
 }
 
-// ─── Delete ───────────────────────────────────────────────────
-function openDeleteModal(productId) {
-  deleteTarget = productId;
-  const p = allProducts.find(x => x.id === productId);
-  document.getElementById('deleteProductName').textContent =
-    p ? `"${p.name}" akan dihapus secara permanen dan tidak bisa dikembalikan.` : 'Produk ini akan dihapus.';
-  openModal('deleteModal');
-}
-
-async function confirmDelete() {
-  if (!deleteTarget) return;
-  const btn = document.getElementById('btnConfirmDelete');
-  btn.disabled = true;
-
+async function deleteProduct(prodId, name) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus produk "${name}"? Data transaksi yang terkait mungkin ikut terpengaruh.`)) return;
+  
   try {
-    await fetchAPI(`/api/products/${deleteTarget}`, { method: 'DELETE' });
-    allProducts = allProducts.filter(p => p.id !== deleteTarget);
-    renderTable();
-    closeModal('deleteModal');
+    await fetchAPI(`/api/products/${prodId}`, { method: 'DELETE' });
+    allProducts = allProducts.filter(p => p.id !== prodId);
+    applyLocalFilters();
+    updateStats(allProducts);
     showToast('Produk berhasil dihapus.', 'success');
   } catch (err) {
     showToast('Gagal menghapus: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    deleteTarget = null;
   }
 }
 
-// ─── Restock ──────────────────────────────────────────────────
-function openRestockModal(productId) {
-  restockTarget = productId;
-  const p = allProducts.find(x => x.id === productId);
-  if (!p) return;
-  document.getElementById('restockProductName').textContent = p.name;
-  document.getElementById('restockCurrentQty').textContent  = p.stock_qty;
-  document.getElementById('restockUnit').textContent        = p.stock_unit;
-  document.getElementById('restockQty').value = '10';
+// ─── Restock Modal ────────────────────────────────────────────
+function openRestockModal(prodId, name, currentQty) {
+  document.getElementById('restockProdId').value = prodId;
+  document.getElementById('restockName').textContent = name;
+  document.getElementById('restockCurrent').textContent = `Sisa stok: ${currentQty || 0}`;
+  document.getElementById('restockQty').value = '';
+  document.getElementById('restockNotes').value = '';
   openModal('restockModal');
 }
 
-async function confirmRestock() {
-  if (!restockTarget) return;
-  const qty = parseInt(document.getElementById('restockQty').value, 10);
-  if (!qty || qty <= 0) return showToast('Jumlah harus lebih dari 0.', 'warning');
-
+async function saveRestock() {
+  const prodId = document.getElementById('restockProdId').value;
+  const qty    = parseInt(document.getElementById('restockQty').value);
+  const notes  = document.getElementById('restockNotes').value.trim();
+  
+  if (!qty || qty <= 0) return showToast('Jumlah restock tidak valid.', 'warning');
+  
   try {
-    const result = await fetchAPI(`/api/products/${restockTarget}/restock`, {
-      method: 'POST',
-      body: { qty }
+    const btn = document.querySelector('#restockModal .btn-primary');
+    btn.disabled = true;
+    
+    const result = await fetchAPI(`/api/products/${prodId}/restock`, {
+      method: 'POST', body: { qty, notes }
     });
-    const p = allProducts.find(x => x.id === restockTarget);
-    if (p) p.stock_qty = result.new_qty;
-    renderTable();
+    
+    // Update local data
+    const prod = allProducts.find(p => p.id === parseInt(prodId));
+    if (prod) prod.stock_qty = result.new_qty;
+    applyLocalFilters();
+    updateStats(allProducts);
+    
     closeModal('restockModal');
-    showToast(`Stok berhasil ditambah. Stok baru: ${result.new_qty}.`, 'success');
+    showToast(`Stok berhasil ditambah. Sisa stok sekarang: ${result.new_qty}`, 'success');
   } catch (err) {
     showToast('Gagal restock: ' + err.message, 'error');
+  } finally {
+    document.querySelector('#restockModal .btn-primary').disabled = false;
+  }
+}
+
+// ─── Adjustment Modal ─────────────────────────────────────────
+function openAdjustModal(prodId, name, currentQty) {
+  const modal = document.getElementById('adjustModal');
+  if (!modal) return;
+  document.getElementById('adjustProdId').value = prodId;
+  document.getElementById('adjustName').textContent = name;
+  document.getElementById('adjustCurrent').textContent = `Sisa stok: ${currentQty || 0}`;
+  document.getElementById('adjustQty').value = '';
+  document.getElementById('adjustNotes').value = '';
+  openModal('adjustModal');
+}
+
+async function saveAdjustment() {
+  const prodId = document.getElementById('adjustProdId').value;
+  const qty    = parseInt(document.getElementById('adjustQty').value);
+  const notes  = document.getElementById('adjustNotes').value.trim();
+  
+  if (isNaN(qty) || qty === 0) return showToast('Jumlah tidak valid.', 'warning');
+  if (!notes) return showToast('Alasan penyesuaian wajib diisi.', 'warning');
+  
+  try {
+    const btn = document.querySelector('#adjustModal .btn-primary');
+    btn.disabled = true;
+    
+    const result = await fetchAPI(`/api/products/${prodId}/adjust`, {
+      method: 'POST', body: { qty, notes }
+    });
+    
+    const prod = allProducts.find(p => p.id === parseInt(prodId));
+    if (prod) prod.stock_qty = result.new_qty;
+    applyLocalFilters();
+    updateStats(allProducts);
+    
+    closeModal('adjustModal');
+    showToast(`Stok disesuaikan. Sisa stok sekarang: ${result.new_qty}`, 'success');
+  } catch (err) {
+    showToast('Gagal menyesuaikan stok: ' + err.message, 'error');
+  } finally {
+    document.querySelector('#adjustModal .btn-primary').disabled = false;
   }
 }

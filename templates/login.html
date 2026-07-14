@@ -1,109 +1,121 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="{{ app_settings.get('theme', 'light') }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — HokiApp Penyetan Hoki</title>
+  <title>Masuk Ke HokiApp — POS Penyetan Hoki</title>
   <meta name="description" content="Login ke sistem manajemen Warung Penyetan Hoki">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body class="auth-page">
 
-  <!-- Decorative background blobs -->
+  <!-- Drifting background elements -->
   <div class="auth-bg-blob auth-bg-blob-1"></div>
   <div class="auth-bg-blob auth-bg-blob-2"></div>
+  <div class="auth-bg-blob auth-bg-blob-3"></div>
 
-  <!-- Login Card -->
-  <div class="login-card">
-    <!-- Header -->
-    <div class="login-card-header">
-      <div class="login-logo">
-        <span class="material-symbols-outlined">restaurant</span>
-      </div>
-      <div>
-        <h1 class="login-app-name">HokiApp</h1>
-        <p class="login-app-sub">Warung Penyetan & Es Teh Hoki</p>
-      </div>
-    </div>
+  <!-- Login Card Container -->
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Top Decorative Bar -->
+      <div class="login-accent-bar"></div>
 
-    <!-- Form -->
-    <div class="login-form-area">
-      {% if error %}
-      <div class="error-banner">
-        <span class="material-symbols-outlined">error</span>
-        <span>{{ error }}</span>
-      </div>
-      {% endif %}
-
-      <form class="login-form" method="POST" action="{{ url_for('login') }}">
-        <!-- Username Field -->
-        <div class="form-group">
-          <label class="form-label" for="username">Admin ID / Username</label>
-          <div class="input-group">
-            <div class="input-icon-left">
-              <span class="material-symbols-outlined icon-sm">badge</span>
-            </div>
-            <input
-              class="form-input has-icon-left"
-              type="text"
-              id="username"
-              name="username"
-              placeholder="Masukkan username"
-              autocomplete="username"
-              required
-              value="{{ request.form.get('username', '') }}"
-            >
+      <!-- Header / Branding -->
+      <div class="login-card-header">
+        <div class="logo-wrapper">
+          <div class="logo-glow"></div>
+          <div class="login-logo">
+            {% if app_settings.get('logo_data') %}
+              <img src="{{ app_settings.get('logo_data') }}" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+            {% else %}
+              <span class="material-symbols-outlined">storefront</span>
+            {% endif %}
           </div>
         </div>
+        <div class="brand-text">
+          <h1 class="login-app-name">Hoki<span>App</span></h1>
+          <p class="login-app-sub">Sistem POS Warung Penyetan & Es Teh Hoki</p>
+        </div>
+      </div>
 
-        <!-- Password Field -->
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <div class="input-group password-wrapper">
-            <div class="input-icon-left">
-              <span class="material-symbols-outlined icon-sm">lock</span>
-            </div>
-            <input
-              class="form-input has-icon-left"
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              autocomplete="current-password"
-              required
-            >
-            <div class="password-toggle" id="passwordToggle" title="Tampilkan/sembunyikan password">
-              <span class="material-symbols-outlined icon-sm" id="passwordToggleIcon">visibility_off</span>
+      <!-- Form Area -->
+      <div class="login-form-area">
+        {% if error %}
+        <div class="error-banner">
+          <div class="error-icon-box">
+            <span class="material-symbols-outlined">warning_amber</span>
+          </div>
+          <span class="error-message">{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form class="login-form" method="POST" action="{{ url_for('login') }}">
+          <!-- Username Field -->
+          <div class="form-group">
+            <label class="form-label" for="username">ID Admin / Username</label>
+            <div class="input-group">
+              <span class="material-symbols-outlined input-prefix">badge</span>
+              <input
+                class="form-input has-prefix"
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Masukkan username"
+                autocomplete="username"
+                required
+                value="{{ request.form.get('username', '') }}"
+              >
             </div>
           </div>
-        </div>
 
-        <!-- Actions row -->
-        <div class="login-actions">
-          <label class="remember-me">
-            <input type="checkbox" name="remember_me" id="rememberMe">
-            <span>Ingat saya</span>
-          </label>
-        </div>
+          <!-- Password Field -->
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-group password-wrapper">
+              <span class="material-symbols-outlined input-prefix">lock</span>
+              <input
+                class="form-input has-prefix"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              >
+              <div class="password-toggle" id="passwordToggle" title="Tampilkan/sembunyikan password">
+                <span class="material-symbols-outlined icon-sm" id="passwordToggleIcon">visibility_off</span>
+              </div>
+            </div>
+          </div>
 
-        <!-- Submit -->
-        <button type="submit" class="btn-login" id="loginBtn">
-          <span class="material-symbols-outlined icon-sm">login</span>
-          MASUK
-        </button>
-      </form>
-    </div>
+          <!-- Actions Row -->
+          <div class="login-actions">
+            <label class="remember-me">
+              <input type="checkbox" name="remember_me" id="rememberMe">
+              <span class="checkbox-custom"></span>
+              <span class="remember-text">Ingat saya di perangkat ini</span>
+            </label>
+          </div>
 
-    <!-- Footer -->
-    <div class="login-card-footer">
-      <span class="material-symbols-outlined">shield</span>
-      <span>Koneksi aman — Sistem offline lokal</span>
+          <!-- Submit Button -->
+          <button type="submit" class="btn-login" id="loginBtn">
+            <span class="btn-text">MASUK KE SISTEM</span>
+            <span class="material-symbols-outlined btn-icon">arrow_forward</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="login-card-footer">
+        <span class="material-symbols-outlined">verified_user</span>
+        <span>Sistem Offline Lokal • Enkripsi Sesi Aman</span>
+      </div>
     </div>
   </div>
 
   <script>
-    // Password toggle
+    // Password visibility toggle
     const toggle = document.getElementById('passwordToggle');
     const pwInput = document.getElementById('password');
     const pwIcon  = document.getElementById('passwordToggleIcon');
@@ -115,15 +127,20 @@
       });
     }
 
-    // Loading state on submit
+    // Loading state during form submit
     const loginBtn = document.getElementById('loginBtn');
     const loginForm = document.querySelector('.login-form');
     if (loginForm) {
       loginForm.addEventListener('submit', () => {
-        loginBtn.innerHTML = '<div class="spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;width:20px;height:20px;border-width:2px;"></div> Memproses...';
+        loginBtn.classList.add('loading');
         loginBtn.disabled = true;
+        loginBtn.innerHTML = `
+          <div class="spinner-circle"></div>
+          <span>MEMPROSES MASUK...</span>
+        `;
       });
     }
   </script>
 </body>
 </html>
+

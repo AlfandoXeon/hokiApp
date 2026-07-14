@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% block title %}Laporan Keuangan{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/laporan.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block breadcrumb_parent %}Admin{% endblock %}
+{% block breadcrumb_current %}Laporan Keuangan{% endblock %}
+{% block page_title %}Laporan Keuangan{% endblock %}
+
+{% block content %}
+<div class="page-canvas">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-title">Laporan Keuangan</div>
+      <div class="page-header-sub">Analisis pendapatan, produk terlaris, dan performa kasir</div>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-outlined" onclick="loadLaporan()" id="btnRefresh">
+        <span class="material-symbols-outlined icon-sm">refresh</span> Refresh
+      </button>
+      <button class="btn btn-primary" onclick="exportExcel()" id="btnExport">
+        <span class="material-symbols-outlined icon-sm">table_view</span>
+        Export Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Filter Toolbar ─── -->
+  <div class="laporan-toolbar">
+    <div class="laporan-filter-group">
+      <div class="date-input-wrap">
+        <label>Dari</label>
+        <input type="date" class="date-input" id="dateFrom">
+      </div>
+      <span class="date-separator">—</span>
+      <div class="date-input-wrap">
+        <label>Sampai</label>
+        <input type="date" class="date-input" id="dateTo">
+      </div>
+
+      <div class="quick-periods">
+        <button class="qp-btn active" onclick="setQuickPeriod('today', this)">Hari Ini</button>
+        <button class="qp-btn" onclick="setQuickPeriod('week', this)">7 Hari</button>
+        <button class="qp-btn" onclick="setQuickPeriod('month', this)">30 Hari</button>
+        <button class="qp-btn" onclick="setQuickPeriod('year', this)">Tahun Ini</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="loadLaporan()">
+      <span class="material-symbols-outlined icon-sm">search</span> Tampilkan
+    </button>
+  </div>
+
+  <!-- Export Progress -->
+  <div class="export-progress" id="exportProgress">
+    <div class="spinner spinner-sm"></div>
+    <span>Menyiapkan file Excel... mohon tunggu.</span>
+  </div>
+
+  <!-- ─── KPI Row ─── -->
+  <div class="laporan-kpi-row" id="laporanKpiRow">
+    <div class="kpi-card green">
+      <div class="kpi-top">
+        <div class="kpi-label">Gross Revenue</div>
+        <div class="kpi-icon green"><span class="material-symbols-outlined icon-fill icon-md">payments</span></div>
+      </div>
+      <div class="kpi-value" id="lkpiRevenue">—</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-top">
+        <div class="kpi-label">Transaksi Selesai</div>
+        <div class="kpi-icon blue"><span class="material-symbols-outlined icon-fill icon-md">receipt_long</span></div>
+      </div>
+      <div class="kpi-value" id="lkpiTxn">—</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-top">
+        <div class="kpi-label">Total Pajak</div>
+        <div class="kpi-icon orange"><span class="material-symbols-outlined icon-fill icon-md">account_balance</span></div>
+      </div>
+      <div class="kpi-value" id="lkpiTax">—</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-top">
+        <div class="kpi-label">Rata-rata Transaksi</div>
+        <div class="kpi-icon purple"><span class="material-symbols-outlined icon-fill icon-md">show_chart</span></div>
+      </div>
+      <div class="kpi-value" id="lkpiAvg">—</div>
+    </div>
+  </div>
+
+  <!-- ─── Main Grid ─── -->
+  <div class="laporan-grid">
+
+    <!-- Left: Charts -->
+    <div style="display:flex;flex-direction:column;gap:var(--gap)">
+
+      <!-- Revenue Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">timeline</span> Grafik Pendapatan Harian
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-success" id="totalRevBadge"></span>
+            <div class="chart-type-switcher">
+              <button class="chart-type-btn active" onclick="switchLaporanChart('bar', this)" title="Bar">
+                <span class="material-symbols-outlined">bar_chart</span>
+              </button>
+              <button class="chart-type-btn" onclick="switchLaporanChart('line', this)" title="Line">
+                <span class="material-symbols-outlined">show_chart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="laporan-chart-area">
+            <canvas id="laporanRevenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produk Terlaris Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">emoji_events</span> Produk Terlaris
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="top-products-table">
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th>Nama Produk</th>
+                <th>Terjual</th>
+                <th>Order</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody id="topProductsTbody">
+              <tr><td colspan="5"><div class="empty-state" style="padding:30px">
+                <span class="material-symbols-outlined">restaurant_menu</span><p>Belum ada data</p>
+              </div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detail Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">list_alt</span> Detail Transaksi
+          </div>
+          <span class="badge badge-neutral" id="txnCountBadge">0 transaksi</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Waktu</th>
+                <th class="stock-col-hide">Kasir</th>
+                <th class="stock-col-hide">Pelanggan</th>
+                <th>Total</th>
+                <th>Metode</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="laporanTxnTbody">
+              <tr><td colspan="7"><div class="empty-state" style="padding:30px">
+                <span class="material-symbols-outlined">receipt_long</span><p>Pilih periode dan klik Tampilkan</p>
+              </div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Summary Panels -->
+    <div style="display:flex;flex-direction:column;gap:var(--gap)">
+
+      <!-- Metode Pembayaran -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">payments</span> Metode Pembayaran
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="payment-breakdown-list" id="paymentBreakdownList">
+            <div class="empty-state" style="padding:20px"><p>Belum ada data</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performa Kasir -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">person</span> Performa Kasir
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="cashierPerformanceList">
+            <div class="empty-state" style="padding:20px"><p>Belum ada data</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ringkasan Keuangan -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">summarize</span> Ringkasan
+          </div>
+        </div>
+        <div class="card-body" id="financialSummaryCard">
+          <div class="empty-state" style="padding:20px"><p>Belum ada data</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/laporan.js') }}"></script>
+{% endblock %}

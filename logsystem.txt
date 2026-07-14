@@ -1,0 +1,576 @@
+
+==================================================
+[2026-07-14 23:49:55] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 554, in api_transactions_create
+    execute_db(
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: table transaction_items has no column named discount_pct
+
+==================================================
+[2026-07-14 23:49:56] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 554, in api_transactions_create
+    execute_db(
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: table transaction_items has no column named discount_pct
+
+==================================================
+[2026-07-14 23:50:18] ERROR in GET http://localhost:5000/api/transactions/pending
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 510, in api_transactions_pending
+    txns = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:18] ERROR in GET http://localhost:5000/api/settings
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 1112, in api_settings_get
+    rows = query_db("SELECT key, value FROM settings")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: settings
+
+==================================================
+[2026-07-14 23:50:20] ERROR in GET http://localhost:5000/api/transactions/pending
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 510, in api_transactions_pending
+    txns = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:20] ERROR in GET http://localhost:5000/api/dashboard/stats?period=today
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 691, in api_dashboard_stats
+    curr = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:22] ERROR in GET http://localhost:5000/api/transactions/pending
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 510, in api_transactions_pending
+    txns = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:22] ERROR in GET http://localhost:5000/api/dashboard/stats?period=today
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 691, in api_dashboard_stats
+    curr = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:23] ERROR in GET http://localhost:5000/api/transactions/pending
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 510, in api_transactions_pending
+    txns = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:50:23] ERROR in GET http://localhost:5000/api/dashboard/stats?period=today
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 691, in api_dashboard_stats
+    curr = query_db(
+           ^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 22, in query_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such table: transactions
+
+==================================================
+[2026-07-14 23:51:10] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 554, in api_transactions_create
+    execute_db(
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: NOT NULL constraint failed: transaction_items.product_name
+
+==================================================
+[2026-07-14 23:51:14] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 554, in api_transactions_create
+    execute_db(
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: NOT NULL constraint failed: transaction_items.product_name
+
+==================================================
+[2026-07-15 00:36:22] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:24] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:24] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:24] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:25] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:25] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:26] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:35] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:36] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:36] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:36] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:36:37] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:41:02] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:41:10] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:41:11] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:41:11] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code
+
+==================================================
+[2026-07-15 00:41:11] ERROR in POST http://localhost:5000/api/transactions
+Traceback (most recent call last):
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS TUF GAMING A15\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 33, in decorated
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\app.py", line 543, in api_transactions_create
+    txn_id = execute_db(
+             ^^^^^^^^^^^
+  File "D:\Coding\WebHTML_GoogleAPIS\Hoki APP\database.py", line 33, in execute_db
+    cur = conn.execute(query, args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: transactions.order_code

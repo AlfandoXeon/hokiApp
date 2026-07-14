@@ -1,129 +1,205 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 {% endblock %}
 
-{% block breadcrumb_current %}{% endblock %}
-{% block page_title %}Dashboard — Ringkasan Hari Ini{% endblock %}
+{% block breadcrumb_parent %}HokiApp{% endblock %}
+{% block breadcrumb_current %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="page-canvas">
   <!-- Page Header -->
   <div class="page-header">
-    <div>
-      <h2 class="page-header-title">Selamat datang, {{ session.get('nama_lengkap', session.get('username')) }}!</h2>
-      <p class="page-header-sub">Berikut ringkasan performa warung Anda</p>
+    <div class="page-header-left">
+      <div class="page-header-title">Selamat datang, {{ current_user.nama_lengkap or current_user.username }}! 👋</div>
+      <div class="page-header-sub" id="dashDateStr">Memuat data...</div>
     </div>
-    <div class="flex items-center gap-md">
-      <!-- Date display -->
-      <div class="date-display">
-        <span class="material-symbols-outlined icon-sm">calendar_today</span>
-        <span id="currentDate">—</span>
+    <div class="page-header-actions">
+      <div class="period-bar" id="periodBar">
+        <button class="period-btn active" data-period="today"  onclick="setPeriod('today',  this)">Hari Ini</button>
+        <button class="period-btn"        data-period="week"   onclick="setPeriod('week',   this)">7 Hari</button>
+        <button class="period-btn"        data-period="month"  onclick="setPeriod('month',  this)">30 Hari</button>
       </div>
-      <!-- Period selector -->
-      <select class="period-select" id="periodSelect" title="Filter periode">
-        <option value="today">Hari Ini</option>
-        <option value="week">Minggu Ini</option>
-        <option value="month">Bulan Ini</option>
-      </select>
+      <a href="/kasir" class="btn btn-primary">
+        <span class="material-symbols-outlined icon-sm">point_of_sale</span>
+        <span class="btn-hide-mobile">Buka Kasir</span>
+      </a>
     </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions mb-md">
+    <a href="/kasir" class="quick-action-btn">
+      <span class="material-symbols-outlined icon-fill" style="color:var(--primary)">add_shopping_cart</span> Transaksi Baru
+    </a>
+    <a href="/stock" class="quick-action-btn">
+      <span class="material-symbols-outlined icon-fill" style="color:var(--secondary)">inventory_2</span> Kelola Stok
+    </a>
+    {% if current_user.role == 'admin' %}
+    <a href="/laporan" class="quick-action-btn">
+      <span class="material-symbols-outlined icon-fill" style="color:#6A1B9A">analytics</span> Lihat Laporan
+    </a>
+    <a href="/api/backup" class="quick-action-btn" target="_blank">
+      <span class="material-symbols-outlined" style="color:var(--warning)">download</span> Backup DB
+    </a>
+    {% endif %}
   </div>
 
   <!-- KPI Cards -->
   <div class="kpi-grid" id="kpiGrid">
-    <!-- Skeleton placeholders -->
-    <div class="kpi-card" id="kpiRevenue">
-      <div class="kpi-card-header">
-        <span class="kpi-label">Total Pendapatan</span>
-        <div class="kpi-icon primary">
-          <span class="material-symbols-outlined icon-sm">payments</span>
-        </div>
+    <div class="kpi-card green">
+      <div class="kpi-top">
+        <div class="kpi-label">Total Pendapatan</div>
+        <div class="kpi-icon green"><span class="material-symbols-outlined icon-fill icon-md">payments</span></div>
       </div>
-      <div class="kpi-value" id="kpiRevenueValue"><div class="spinner"></div></div>
-      <div class="kpi-footer positive" id="kpiRevenueGrowth">
-        <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
-        <span>Memuat...</span>
+      <div class="kpi-value" id="kpiRevenue">—</div>
+      <div class="kpi-trend flat" id="kpiRevTrend">
+        <span class="material-symbols-outlined icon-xs">trending_flat</span> Memuat...
       </div>
     </div>
 
-    <div class="kpi-card" id="kpiTransactions">
-      <div class="kpi-card-header">
-        <span class="kpi-label">Total Transaksi</span>
-        <div class="kpi-icon secondary">
-          <span class="material-symbols-outlined icon-sm">receipt_long</span>
-        </div>
+    <div class="kpi-card blue">
+      <div class="kpi-top">
+        <div class="kpi-label">Total Transaksi</div>
+        <div class="kpi-icon blue"><span class="material-symbols-outlined icon-fill icon-md">receipt_long</span></div>
       </div>
-      <div class="kpi-value" id="kpiTxnValue"><div class="spinner"></div></div>
-      <div class="kpi-footer positive" id="kpiTxnGrowth">
-        <span class="material-symbols-outlined" style="font-size:14px">trending_up</span>
-        <span>Memuat...</span>
+      <div class="kpi-value" id="kpiTxn">—</div>
+      <div class="kpi-trend flat" id="kpiTxnTrend">
+        <span class="material-symbols-outlined icon-xs">trending_flat</span> Memuat...
       </div>
     </div>
 
-    <div class="kpi-card" id="kpiBestSeller">
-      <div class="kpi-card-header">
-        <span class="kpi-label">Menu Paling Laku</span>
-        <div class="kpi-icon tertiary">
-          <span class="material-symbols-outlined icon-sm">local_fire_department</span>
-        </div>
+    <div class="kpi-card orange">
+      <div class="kpi-top">
+        <div class="kpi-label">Rata-rata Order</div>
+        <div class="kpi-icon orange"><span class="material-symbols-outlined icon-fill icon-md">show_chart</span></div>
       </div>
-      <div class="kpi-value-md" id="kpiBestName" style="margin-top:10px;font-size:18px">—</div>
-      <div class="kpi-footer neutral" id="kpiBestQty">
-        <span class="material-symbols-outlined" style="font-size:14px">bar_chart</span>
-        <span>Memuat...</span>
+      <div class="kpi-value" id="kpiAvg">—</div>
+      <div class="kpi-sub text-muted" style="font-size:12px">per transaksi selesai</div>
+    </div>
+
+    <div class="kpi-card purple">
+      <div class="kpi-top">
+        <div class="kpi-label">Menu Paling Laku</div>
+        <div class="kpi-icon purple"><span class="material-symbols-outlined icon-fill icon-md">restaurant_menu</span></div>
+      </div>
+      <div class="kpi-value" id="kpiBestName" style="font-size:18px; font-weight:700">—</div>
+      <div class="kpi-trend flat" id="kpiBestQty">
+        <span class="material-symbols-outlined icon-xs">bar_chart</span> Belum ada data
       </div>
     </div>
   </div>
 
-  <!-- Main Split: Transactions + Low Stock -->
-  <div class="dashboard-grid">
-    <!-- Left: Transaction History -->
-    <div class="card transactions-card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <span class="material-symbols-outlined">receipt_long</span>
-          Riwayat Transaksi
-        </h3>
-        <a href="{{ url_for('kasir') }}" class="btn btn-sm btn-outlined">
-          <span class="material-symbols-outlined icon-sm">add</span>
-          Transaksi Baru
-        </a>
+  <!-- Main Content Grid -->
+  <div class="dashboard-content-grid">
+
+    <!-- Left: Charts & Transactions -->
+    <div style="display:flex;flex-direction:column;gap:var(--gap)">
+
+      <!-- Revenue Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">timeline</span>
+            Grafik Pendapatan (7 Hari Terakhir)
+          </div>
+          <div class="chart-type-switcher">
+            <button class="chart-type-btn active" id="ctBar" onclick="switchChart('bar')" title="Bar chart">
+              <span class="material-symbols-outlined">bar_chart</span>
+            </button>
+            <button class="chart-type-btn" id="ctLine" onclick="switchChart('line')" title="Line chart">
+              <span class="material-symbols-outlined">show_chart</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="table-wrapper">
-        <table id="transactionTable">
-          <thead>
-            <tr>
-              <th>ID Pesanan</th>
-              <th>Waktu</th>
-              <th>Item Terjual</th>
-              <th>Total</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="transactionTableBody">
-            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--on-surface-variant)">
-              <div class="spinner" style="margin:0 auto 12px"></div>Memuat data...
-            </td></tr>
-          </tbody>
-        </table>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined">history</span>
+            Riwayat Transaksi
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="txnBadge" class="badge badge-info" style="display:none"></span>
+            <a href="/laporan" class="btn btn-outlined btn-sm" {% if current_user.role != 'admin' %}style="display:none"{% endif %}>
+              Lihat Semua
+            </a>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th>
+                <th>Waktu</th>
+                <th class="hide-xs">Pelanggan</th>
+                <th>Item</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="txnTableBody">
+              <tr><td colspan="6"><div class="empty-state"><div class="spinner"></div><p>Memuat data...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Right: Stock Alerts -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <span class="material-symbols-outlined" style="color:var(--tertiary)">warning</span>
-          Peringatan Stock
-        </h3>
-        <a href="{{ url_for('stock') }}" class="btn btn-sm btn-ghost">Kelola</a>
-      </div>
-      <div class="stock-alerts-list" id="stockAlertsList">
-        <div style="text-align:center;padding:32px;color:var(--on-surface-variant)">
-          <div class="spinner" style="margin:0 auto 12px"></div>Memuat...
+    <!-- Right: Alerts & Stats -->
+    <div style="display:flex;flex-direction:column;gap:var(--gap)">
+
+      <!-- Revenue Summary Card -->
+      <div class="revenue-box">
+        <div class="revenue-box-label">Total Pendapatan Periode Ini</div>
+        <div class="revenue-box-value" id="revBoxVal">Rp 0</div>
+        <div class="revenue-box-growth" id="revBoxGrowth">
+          <span class="material-symbols-outlined" style="font-size:16px">info</span>
+          Memuat...
         </div>
       </div>
+
+      <!-- Top Products -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="material-symbols-outlined">emoji_events</span> Top 5 Menu</div>
+        </div>
+        <div class="card-body">
+          <div id="topProductsList">
+            <div class="empty-state" style="padding:20px">
+              <span class="material-symbols-outlined">restaurant_menu</span>
+              <p>Belum ada data</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock Alerts -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--warning)">warning</span>
+            Peringatan Stok
+          </div>
+          <a href="/stock" class="btn btn-ghost btn-sm">Kelola</a>
+        </div>
+        <div class="card-body" style="padding:12px">
+          <div class="stock-alerts-list" id="stockAlertsList">
+            <div class="empty-state" style="padding:20px"><div class="spinner"></div><p>Memuat...</p></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
